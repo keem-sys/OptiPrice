@@ -22,8 +22,30 @@ public class CheckersScraper {
 
     public List<CheckersProduct> scrapeProducts(String searchTerm) {
         try (Playwright playwright = Playwright.create()) {
-            Browser browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(false));
-            BrowserContext context = browser.newContext();
+
+            List<String> args = new ArrayList<>();
+            args.add("--disable-blink-features=AutomationControlled");
+            args.add("--no-sandbox");
+
+            BrowserType.LaunchOptions launchOptions = new BrowserType.LaunchOptions()
+                    .setHeadless(true)
+                    .setArgs(args);
+
+            Browser browser = playwright.chromium().launch(launchOptions);
+
+            Browser.NewContextOptions contextOptions = new Browser.NewContextOptions()
+                    .setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36")
+                    .setViewportSize(1920, 1080)
+                    .setDeviceScaleFactor(1.0)
+                    .setHasTouch(false)
+                    .setJavaScriptEnabled(true)
+                    .setLocale("en-ZA")
+                    .setTimezoneId("Africa/Johannesburg");
+
+            BrowserContext context = browser.newContext(contextOptions);
+
+            context.addInitScript("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})");
+
             Page page = context.newPage();
 
             AtomicReference<String> jsonCapture = new AtomicReference<>();
