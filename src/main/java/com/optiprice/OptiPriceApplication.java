@@ -1,7 +1,7 @@
 package com.optiprice;
 
-import com.optiprice.dto.checkers.CheckersProduct;
-import com.optiprice.scraper.CheckersScraper;
+import com.optiprice.dto.shoprite.ShopriteProduct;
+import com.optiprice.scraper.ShopriteScraper;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -18,32 +18,33 @@ public class OptiPriceApplication {
 	}
 
 	@Bean
-	CommandLineRunner testScraper(CheckersScraper scraper) {
+	CommandLineRunner testShoprite(ShopriteScraper scraper) {
 		return args -> {
-			System.out.println("--- STARTING PLAYWRIGHT CHECKERS SCRAPE ---");
+			System.out.println("--- STARTING PLAYWRIGHT SHOPRITE SCRAPE ---");
 
-			List<CheckersProduct> products = scraper.scrapeProducts("milk");
+			List<ShopriteProduct> products = scraper.scrapeProducts("milk");
 
 			if (products.isEmpty()) {
-				System.out.println("No products found!");
+				System.out.println("No products found! Check if the selector '.product-frame' is correct.");
 			} else {
 				System.out.println("=== RESULTS: " + products.size() + " PRODUCTS ===");
 				System.out.println();
 
 				for (int i = 0; i < Math.min(10, products.size()); i++) {
-					CheckersProduct product = products.get(i);
-					String priceStr = product.price() != null ? product.price().formattedValue() : "N/A";
+					ShopriteProduct product = products.get(i);
+
 					System.out.printf("%d. %s%n", (i + 1), product.name());
-					System.out.printf("   Price: %s | Stock: %s | Article: %s%n",
-							priceStr,
-							product.isStockAvailable() ? "In Stock" : "Out of Stock",
-							product.articleNumber()
+					System.out.printf("   Price: R%s | Brand: %s | ID: %s%n",
+							product.price(),
+							product.getDisplayBrand(),
+							product.id()
 					);
+
 					System.out.println();
 				}
 
 				if (products.size() > 10) {
-					System.out.println("... and " + (products.size() - 10) + " more products");
+					System.out.println("... and " + (products.size() - 10) + " more products.");
 				}
 
 				System.out.println("--- FINISHED ---");
