@@ -1,7 +1,7 @@
 package com.optiprice;
 
-import com.optiprice.scraper.PnpScraper;
-import com.optiprice.dto.pnp.PnpProduct;
+import com.optiprice.dto.checkers.CheckersProduct;
+import com.optiprice.scraper.CheckersScraper;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -18,17 +18,36 @@ public class OptiPriceApplication {
 	}
 
 	@Bean
-	CommandLineRunner testScraper(PnpScraper scraper) {
+	CommandLineRunner testScraper(CheckersScraper scraper) {
 		return args -> {
-			System.out.println("--- STARTING PLAYWRIGHT PNP SCRAPE ---");
+			System.out.println("--- STARTING PLAYWRIGHT CHECKERS SCRAPE ---");
 
-			List<PnpProduct> products = scraper.scrapeProducts("milk");
+			List<CheckersProduct> products = scraper.scrapeProducts("milk");
 
-			products.forEach(p -> {
-				System.out.println("Found: " + p.name() + " | Price: " + p.price().formattedValue());
-			});
+			if (products.isEmpty()) {
+				System.out.println("No products found!");
+			} else {
+				System.out.println("=== RESULTS: " + products.size() + " PRODUCTS ===");
+				System.out.println();
 
-			System.out.println("--- FINISHED ---");
+				for (int i = 0; i < Math.min(10, products.size()); i++) {
+					CheckersProduct product = products.get(i);
+					String priceStr = product.price() != null ? product.price().formattedValue() : "N/A";
+					System.out.printf("%d. %s%n", (i + 1), product.name());
+					System.out.printf("   Price: %s | Stock: %s | Article: %s%n",
+							priceStr,
+							product.isStockAvailable() ? "In Stock" : "Out of Stock",
+							product.articleNumber()
+					);
+					System.out.println();
+				}
+
+				if (products.size() > 10) {
+					System.out.println("... and " + (products.size() - 10) + " more products");
+				}
+
+				System.out.println("--- FINISHED ---");
+			}
 		};
 	}
 }
