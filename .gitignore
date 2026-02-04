@@ -3,7 +3,9 @@ target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+.env
 checkers-products-response.json
+src/main/resources/application-secret.properties
 
 ### STS ###
 .apt_generated

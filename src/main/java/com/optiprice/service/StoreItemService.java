@@ -14,15 +14,15 @@ import java.time.OffsetDateTime;
 
 @Service
 @RequiredArgsConstructor
-public class ProductService {
+public class StoreItemService {
 
     private final StoreItemRepository itemRepo;
     private final PriceLogRepository priceLogRepo;
 
+
     @Transactional
-    public void processScrapedProduct(Store store, String externalId, String name,
-                                      String brand, BigDecimal price,
-                                      String imageUrl, String productUrl) {
+    public void saveOrUpdateItem(Store store, String externalId, String name, String brand,
+                                 BigDecimal price, String imageUrl, String productUrl) {
 
         OffsetDateTime now = OffsetDateTime.now();
 

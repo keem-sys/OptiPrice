@@ -9,6 +9,13 @@ public class Store {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(unique = true, nullable = false)
     private String name;
+
     private String logoUrl;
+
+    public Store(String name, String logoUrl) {
+        this.name = name;
+        this.logoUrl = logoUrl;
+    }
 }

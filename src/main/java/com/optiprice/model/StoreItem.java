@@ -4,21 +4,29 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.time.LocalDateTime;
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 
 @Entity
 @Getter @Setter @NoArgsConstructor
 public class StoreItem {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long Id;
+    private Long id;
+
+    @Column(precision = 10, scale = 2)
+    private BigDecimal currentPrice;
 
     private String storeSpecificName;
-    private Double currentPrice;
+    private String brand;
+    private String externalId;
     private String imageUrl;
+
+    @Column(length = 1000)
     private String productUrl;
-    private LocalDateTime lastUpdated;
+
+    private OffsetDateTime lastUpdated;
 
     @ManyToOne
     @JoinColumn(name = "store_id")
