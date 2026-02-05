@@ -21,9 +21,11 @@ public class StoreItem {
     private String storeSpecificName;
     private String brand;
     private String externalId;
+
+    @Column(columnDefinition = "TEXT")
     private String imageUrl;
 
-    @Column(length = 1000)
+    @Column(columnDefinition = "TEXT")
     private String productUrl;
 
     private OffsetDateTime lastUpdated;

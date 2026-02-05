@@ -1,6 +1,7 @@
 package com.optiprice.dto.shoprite;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record ShopriteProduct(
@@ -8,8 +9,14 @@ public record ShopriteProduct(
         String name,
         String price,
         String brand,
-        String stock
+        String stock,
+        @JsonProperty("product_image_url")
+        String productImageUrl,
+        String productUrl
 ) {
+        public ShopriteProduct withUrl(String url) {
+                return new ShopriteProduct(id, name, price, brand, stock, productImageUrl, url);
+        }
 
         public String getDisplayBrand() {
                 if (brand != null && !brand.trim().isEmpty()) {

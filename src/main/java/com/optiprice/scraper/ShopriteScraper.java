@@ -48,10 +48,14 @@ public class ShopriteScraper {
             for (ElementHandle element : productElements) {
                 String jsonAttribute = element.getAttribute("data-product-ga");
 
+                ElementHandle linkElement = element.querySelector("a");
+                String relativeUrl = (linkElement != null) ? linkElement.getAttribute("href") : "";
+                String absoluteUrl = "https://www.shoprite.co.za" + relativeUrl;
+
                 if (jsonAttribute != null && !jsonAttribute.isEmpty()) {
                     try {
                         ShopriteProduct product = objectMapper.readValue(jsonAttribute, ShopriteProduct.class);
-                        products.add(product);
+                        products.add(product.withUrl(absoluteUrl));
                     } catch (Exception e) {
                         System.err.println("Failed to parse product JSON: " + e.getMessage());
                     }

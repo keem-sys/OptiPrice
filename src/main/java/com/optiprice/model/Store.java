@@ -13,9 +13,11 @@ public class Store {
     private String name;
 
     private String logoUrl;
+    private String websiteUrl;
 
-    public Store(String name, String logoUrl) {
+    public Store(String name, String logoUrl,  String websiteUrl) {
         this.name = name;
         this.logoUrl = logoUrl;
+        this.websiteUrl = websiteUrl;
     }
 }

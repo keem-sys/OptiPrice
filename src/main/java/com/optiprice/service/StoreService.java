@@ -13,8 +13,8 @@ public class StoreService {
     private final StoreRepository storeRepository;
 
     @Transactional
-    public Store getOrCreateStore(String name, String logoUrl) {
+    public Store getOrCreateStore(String name, String logoUrl, String websiteUrl) {
         return storeRepository.findByName(name)
-                .orElseGet(() -> storeRepository.save(new Store(name, logoUrl)));
+                .orElseGet(() -> storeRepository.save(new Store(name, logoUrl, websiteUrl)));
     }
 }

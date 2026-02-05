@@ -9,5 +9,6 @@ public record PnpProduct(
         String name,
         Boolean inStockIndicator,
         PnpPrice price,
-        List<PnpImage> images
+        List<PnpImage> images,
+        String productUrl
 ) {}

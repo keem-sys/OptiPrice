@@ -73,7 +73,7 @@ public class CheckersScraper {
 
             for (int i = 0; i < 20; i++) {
                 if (jsonCapture.get() != null) {
-                    System.out.println("✓ API response captured after " + (i + 1) + " seconds");
+                    System.out.println("API response captured after " + (i + 1) + " seconds");
                     break;
                 }
                 page.waitForTimeout(1000);
@@ -117,7 +117,7 @@ public class CheckersScraper {
                 JsonNode root = objectMapper.readTree(json);
                 if (root.has("products") && root.get("products").isArray()) {
                     JsonNode productsArray = root.get("products");
-                    System.out.println("⚠ Fallback parsing found " + productsArray.size() + " products");
+                    System.out.println("Fallback parsing found " + productsArray.size() + " products");
 
                     for (JsonNode productNode : productsArray) {
                         try {
@@ -149,7 +149,7 @@ public class CheckersScraper {
 
         System.out.println();
         if (products.isEmpty()) {
-            System.out.println("❌ No products found!");
+            System.out.println("No products found!");
         } else {
             System.out.println("=== RESULTS: " + products.size() + " PRODUCTS ===");
             System.out.println();
@@ -157,9 +157,16 @@ public class CheckersScraper {
             for (int i = 0; i < Math.min(10, products.size()); i++) {
                 CheckersProduct product = products.get(i);
                 String priceStr = product.price() != null ? product.price().formattedValue() : "N/A";
+                String brand = product.brand();
+
+                if (brand == null || brand.trim().isEmpty()) {
+                    brand = product.name().split("\\s+")[0];
+                }
+
                 System.out.printf("%d. %s%n", (i + 1), product.name());
-                System.out.printf("   Price: %s | Stock: %s | Article: %s%n",
+                System.out.printf("   Price: %s | Brand: %s | Stock: %s | Article: %s%n",
                         priceStr,
+                        brand,
                         product.isStockAvailable() ? "In Stock" : "Out of Stock",
                         product.articleNumber()
                 );
