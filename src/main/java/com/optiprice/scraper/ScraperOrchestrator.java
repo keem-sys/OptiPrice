@@ -26,8 +26,8 @@ public class ScraperOrchestrator {
     public void scrapeAllStores(String searchTerm) {
         System.out.println("--- Orchestrating Scrape for: " + searchTerm + " ---");
         // scrapeShoprite(searchTerm);
-        // scrapeCheckers(searchTerm);
         scrapePnp(searchTerm);
+        // scrapeCheckers(searchTerm);
     }
 
     private void scrapeShoprite(String searchTerm) {
@@ -61,12 +61,12 @@ public class ScraperOrchestrator {
     private void scrapeCheckers(String searchTerm) {
         try {
             Store checkers = storeService.getOrCreateStore("Checkers",
-                    "https://upload.wikimedia.org/wikipedia/en/thumb/b/b4/" +
-                            "Checkers_%28supermarket_chain%29_Logo.svg/2560px-Checkers_" +
-                            "%28supermarket_chain%29_Logo.svg.png", "https://checkers.co.za/");
+                    "https://upload.wikimedia.org/wikipedia/en/thumb/b/b4/Checkers_%28supermarket_chain%29_Logo.svg/2560px-Checkers_%28supermarket_chain%29_Logo.svg.png",
+                    "https://checkers.co.za/");
             List<CheckersProduct> products = checkersScraper.scrapeProducts(searchTerm);
 
-            for (CheckersProduct p : products) {
+            List<CheckersProduct> limitedProducts = products.stream().limit(10).toList();
+            for (CheckersProduct p : limitedProducts) {
                 String name = (p.displayName() != null) ? p.displayName() : p.name();
 
                 String productUrl = "https://www.checkers.co.za/p/" + p.id();
@@ -89,16 +89,17 @@ public class ScraperOrchestrator {
     private void scrapePnp(String searchTerm) {
         try {
             Store pnp = storeService.getOrCreateStore("Pick n Pay",
-                    "https://upload.wikimedia.org/wikipedia/commons/thumb/f/" +
-                            "f8/Pick_n_Pay_logo.svg/2560px-Pick_n_Pay_logo.svg.png", "https://pnp.co.za/");
+                    "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Pick_n_Pay_logo.svg/2560px-Pick_n_Pay_logo.svg.png",
+                    "https://pnp.co.za/");
             List<PnpProduct> products = pnpScraper.scrapeProducts(searchTerm);
-
             if (products.isEmpty()) {
                 System.out.println("PnP Scraper returned 0 products.");
                 return;
             }
 
-            for (PnpProduct p : products) {
+            List<PnpProduct> limitedProducts = products.stream().limit(10).toList();
+
+            for (PnpProduct p : limitedProducts) {
                 BigDecimal price = (p.price() != null && p.price().value() != null)
                         ? BigDecimal.valueOf(p.price().value())
                         : BigDecimal.ZERO;

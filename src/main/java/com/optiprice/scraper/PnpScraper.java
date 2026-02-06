@@ -2,8 +2,8 @@ package com.optiprice.scraper;
 
 import com.microsoft.playwright.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.microsoft.playwright.options.WaitUntilState;
-import com.optiprice.dto.checkers.CheckersProduct;
 import com.optiprice.dto.pnp.PnpResponse;
 import com.optiprice.dto.pnp.PnpProduct;
 import org.springframework.stereotype.Service;
@@ -20,42 +20,51 @@ public class PnpScraper {
     public List<PnpProduct> scrapeProducts(String searchTerm) {
         try (Playwright playwright = Playwright.create()) {
 
-            List<String> args = new ArrayList<>();
-            args.add("--disable-blink-features=AutomationControlled");
-            args.add("--no-sandbox");
-
+            // 1. Launch with standard stealth args
             Browser browser = playwright.chromium().launch(new BrowserType.LaunchOptions()
                     .setHeadless(true)
-                    .setArgs(args));
+                    .setArgs(List.of("--disable-blink-features=AutomationControlled", "--no-sandbox")));
 
             BrowserContext context = browser.newContext(new Browser.NewContextOptions()
-                    .setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36")
-                    .setViewportSize(1920, 1080)
-                    .setLocale("en-ZA"));
-
-            context.addInitScript("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})");
+                    .setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36")
+                    .setViewportSize(1920, 1080));
 
             Page page = context.newPage();
-
             AtomicReference<String> jsonCapture = new AtomicReference<>();
 
+            // 2. Flexible Interceptor
             page.onResponse(response -> {
                 String url = response.url();
-                if (url.contains("/products/search") &&
-                        url.toLowerCase().contains("query=" + searchTerm.toLowerCase()) &&
-                        response.status() == 200) {
+                // We only care about the search endpoint
+                if (url.contains("/products/search") && response.status() == 200) {
                     try {
-                        jsonCapture.set(response.text());
+                        String body = response.text();
+
+                        // Use Jackson to check if products exist (safer than string matching)
+                        JsonNode root = objectMapper.readTree(body);
+                        if (root.has("products") && root.get("products").isArray() && root.get("products").size() > 0) {
+                            // Only capture if we actually found items
+                            jsonCapture.set(body);
+                        }
                     } catch (Exception e) {
+                        // ignore parsing errors of intermediate requests
                     }
                 }
             });
 
+            // 3. Direct Navigation (Fastest)
             String searchUrl = "https://www.pnp.co.za/search/" + searchTerm;
             System.out.println("PnP: Navigating to " + searchUrl);
-            page.navigate(searchUrl);
 
-            for (int i = 0; i < 30; i++) {
+            // Wait for load, but don't hang on networkidle which can be slow
+            page.navigate(searchUrl, new Page.NavigateOptions().setWaitUntil(WaitUntilState.DOMCONTENTLOADED));
+
+            // 4. Mimic human activity to trigger the second AJAX call
+            page.waitForTimeout(2000);
+            page.mouse().wheel(0, 400); // Small scroll
+
+            // 5. Patient Wait loop
+            for (int i = 0; i < 20; i++) {
                 if (jsonCapture.get() != null) break;
                 page.waitForTimeout(1000);
             }
@@ -65,51 +74,15 @@ public class PnpScraper {
             if (jsonCapture.get() != null) {
                 PnpResponse response = objectMapper.readValue(jsonCapture.get(), PnpResponse.class);
                 List<PnpProduct> products = response.products() != null ? response.products() : new ArrayList<>();
-                System.out.println("Parsed " + products.size() + " products from PnP API response");
-                return response.products();
+                System.out.println("✓ Successfully captured " + products.size() + " products for PnP.");
+                return products;
             }
 
         } catch (Exception e) {
-            System.err.println("Playwright Error: " + e.getMessage());
+            System.err.println("PnP Scraper Error: " + e.getMessage());
         }
 
+        System.out.println("⚠ PnP: No data captured after waiting.");
         return new ArrayList<>();
-    }
-
-
-    // JUST FOR TESTING
-    public static void main(String[] args) {
-        String searchTerm = args.length > 0 ? args[0] : "milk";
-
-        System.out.println("=== PNP SCRAPER TEST ===");
-        System.out.println("Search term: " + searchTerm);
-        System.out.println();
-
-        PnpScraper scraper = new PnpScraper();
-        List<PnpProduct> products = scraper.scrapeProducts(searchTerm);
-
-        System.out.println();
-        if (products.isEmpty()) {
-            System.out.println("❌ No products found!");
-        } else {
-            System.out.println("=== RESULTS: " + products.size() + " PRODUCTS ===");
-            System.out.println();
-
-            for (int i = 0; i < Math.min(10, products.size()); i++) {
-                PnpProduct product = products.get(i);
-                String priceStr = product.price() != null ? product.price().formattedValue() : "N/A";
-                System.out.printf("%d. %s%n", (i + 1), product.name());
-                System.out.printf("   Price: %s | Stock: %s | Article: %s%n",
-                        priceStr,
-                        product.inStockIndicator() ? "In Stock" : "Out of Stock",
-                        product.code()
-                );
-                System.out.println();
-            }
-
-            if (products.size() > 10) {
-                System.out.println("... and " + (products.size() - 10) + " more products");
-            }
-        }
     }
 }

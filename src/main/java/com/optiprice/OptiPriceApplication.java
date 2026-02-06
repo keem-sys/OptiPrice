@@ -15,11 +15,11 @@ public class OptiPriceApplication {
 	}
 
 	@Bean
-	CommandLineRunner testShoprite(ScraperOrchestrator orchestrator) {
+	CommandLineRunner testFullShops(ScraperOrchestrator orchestrator) {
 		return args -> {
-			System.out.println("--- STARTING PLAYWRIGHT SCRAPE ---");
+			System.out.println("PHASE 1: STARTING FULL SHOPS SCRAPE");
 				orchestrator.scrapeAllStores("milk");
-			System.out.println("--- FINISHED ---");
+			System.out.println("PHASE 1 COMPLETE: DATA SHOULD BE PERSISTED");
 		};
 	}
 }
