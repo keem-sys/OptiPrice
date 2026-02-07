@@ -2,32 +2,26 @@ package com.optiprice.service;
 
 import com.optiprice.dto.response.CategoryResponse;
 import com.optiprice.dto.response.MatchResponse;
-import com.optiprice.model.MasterProduct;
 import com.optiprice.model.StoreItem;
-import com.optiprice.repository.MasterProductRepository;
-import com.optiprice.repository.StoreItemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class MatchingService {
     private final VectorStore vectorStore;
-    private final ChatClient.Builder chatClientBuilder;
-    private final MasterProductRepository masterProductRepository;
-    private final StoreItemRepository itemRepository;
+    private final ChatClient chatClient;
+    private final MasterProductService masterProductService;
 
-    @Transactional
     public void findOrCreateMasterProduct(StoreItem item) {
+        String category = predictCategory(item.getStoreSpecificName());
         String itemLabel = item.getBrand() + " " + item.getStoreSpecificName();
 
         List<Document> similarProducts = vectorStore.similaritySearch(
@@ -39,7 +33,7 @@ public class MatchingService {
         );
 
         if (similarProducts.isEmpty()) {
-            createNewMasterProduct(item);
+            masterProductService.createNewMasterProduct(item, category);
             return;
         }
 
@@ -51,8 +45,7 @@ public class MatchingService {
                 .collect(Collectors.joining("\n"));
 
         try {
-            MatchResponse response = chatClientBuilder.build()
-                    .prompt()
+            MatchResponse response = chatClient.prompt()
                     .user(u -> u.text("""
                         You are a strict data auditor. Compare this Grocery Item to the Candidates.
                         NEW ITEM: "{name}" (Brand: {brand})
@@ -74,48 +67,20 @@ public class MatchingService {
                     .entity(MatchResponse.class);
 
             if (response != null && response.match() && response.candidate_id() != null) {
-                linkToExistingMaster(item, response.candidate_id());
+                masterProductService.linkToExistingMaster(item, response.candidate_id(), category);
             } else {
-                createNewMasterProduct(item);
+                masterProductService.createNewMasterProduct(item, category);
             }
         } catch (Exception e) {
             System.err.println("AI Matching failed: " + e.getMessage());
             // IF ALL HELL BREAK LOOSE DUPLICATE
-            createNewMasterProduct(item);
+            masterProductService.createNewMasterProduct(item, category);
         }
-    }
-
-    private void createNewMasterProduct(StoreItem storeItem) {
-        String brand = storeItem.getBrand();
-        String specificName = storeItem.getStoreSpecificName();
-
-        String fullName = (specificName.toLowerCase().startsWith(brand.toLowerCase()))
-                ? specificName
-                : brand + " " + specificName;
-
-        System.out.println("AI: Creating NEW Master Product for: " + fullName);
-
-        String category = predictCategory(fullName);
-        System.out.println("Auto-Categorized as: " + category);
-
-        MasterProduct masterProduct = new MasterProduct();
-        masterProduct.setGenericName(fullName);
-        masterProduct.setCategory(category);
-        MasterProduct savedMaster = masterProductRepository.save(masterProduct);
-
-        storeItem.setMasterProduct(savedMaster);
-        itemRepository.save(storeItem);
-
-        Document vectorDoc = new Document(
-                storeItem.getBrand() + " " + storeItem.getStoreSpecificName(),
-                Map.of("master_id", savedMaster.getId())
-        );
-        vectorStore.add(List.of(vectorDoc));
     }
 
     private String predictCategory(String productName) {
         try {
-            CategoryResponse response = chatClientBuilder.build()
+            CategoryResponse response = chatClient
                     .prompt()
                     .user(u -> u.text("""
                     Return ONLY a valid JSON object
@@ -139,11 +104,7 @@ public class MatchingService {
                     .call()
                     .entity(CategoryResponse.class);
 
-            if (response != null && response.category() != null) {
-                return response.category();
-            } else {
-                return "General";
-            }
+            return (response != null && response.category() != null) ? response.category() : "General";
 
         } catch (Exception e) {
             System.err.println("Category prediction failed for '" + productName + "': " + e.getMessage());
@@ -151,19 +112,5 @@ public class MatchingService {
         }
     }
 
-    private void linkToExistingMaster(StoreItem item, String masterIdString) {
-        try {
-            String cleanId = masterIdString.replaceAll("[^0-9]", "");
-            Long masterId = Long.parseLong(cleanId);
-            System.out.println("AI: MATCH FOUND! Linking '" + item.getStoreSpecificName() + "' to Master ID: " + masterId);
 
-            masterProductRepository.findById(masterId).ifPresent(master -> {
-                item.setMasterProduct(master);
-                itemRepository.save(item);
-            });
-        } catch (Exception e) {
-            System.err.println("Failed to link matched ID: " + masterIdString);
-            createNewMasterProduct(item);
-        }
-    }
 }
