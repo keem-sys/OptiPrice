@@ -1,5 +1,6 @@
 package com.optiprice.service;
 
+import com.optiprice.dto.response.CategoryResponse;
 import com.optiprice.dto.response.MatchResponse;
 import com.optiprice.model.MasterProduct;
 import com.optiprice.model.StoreItem;
@@ -85,11 +86,21 @@ public class MatchingService {
     }
 
     private void createNewMasterProduct(StoreItem storeItem) {
-        System.out.println("AI: Creating NEW Master Product for: " + storeItem.getStoreSpecificName());
+        String brand = storeItem.getBrand();
+        String specificName = storeItem.getStoreSpecificName();
+
+        String fullName = (specificName.toLowerCase().startsWith(brand.toLowerCase()))
+                ? specificName
+                : brand + " " + specificName;
+
+        System.out.println("AI: Creating NEW Master Product for: " + fullName);
+
+        String category = predictCategory(fullName);
+        System.out.println("Auto-Categorized as: " + category);
 
         MasterProduct masterProduct = new MasterProduct();
-        masterProduct.setGenericName(storeItem.getStoreSpecificName());
-        masterProduct.setCategory("General");
+        masterProduct.setGenericName(fullName);
+        masterProduct.setCategory(category);
         MasterProduct savedMaster = masterProductRepository.save(masterProduct);
 
         storeItem.setMasterProduct(savedMaster);
@@ -100,6 +111,44 @@ public class MatchingService {
                 Map.of("master_id", savedMaster.getId())
         );
         vectorStore.add(List.of(vectorDoc));
+    }
+
+    private String predictCategory(String productName) {
+        try {
+            CategoryResponse response = chatClientBuilder.build()
+                    .prompt()
+                    .user(u -> u.text("""
+                    Return ONLY a valid JSON object
+                    Classify the grocery product: "{product}"
+                    
+                    Choose ONE category from this exact list:
+                    - Dairy
+                    - Bakery
+                    - Meat & Poultry
+                    - Fruit & Vegetables
+                    - Pantry
+                    - Beverages
+                    - Frozen Food
+                    - Personal Care
+                    - Household Cleaning
+                    - Sweets & Snacks
+                    
+                    Return ONLY the JSON. If unclear, return "Pantry".
+                    """)
+                            .param("product", productName))
+                    .call()
+                    .entity(CategoryResponse.class);
+
+            if (response != null && response.category() != null) {
+                return response.category();
+            } else {
+                return "General";
+            }
+
+        } catch (Exception e) {
+            System.err.println("Category prediction failed for '" + productName + "': " + e.getMessage());
+            return "General";
+        }
     }
 
     private void linkToExistingMaster(StoreItem item, String masterIdString) {

@@ -25,9 +25,9 @@ public class ScraperOrchestrator {
 
     public void scrapeAllStores(String searchTerm) {
         System.out.println("--- Orchestrating Scrape for: " + searchTerm + " ---");
-        // scrapeShoprite(searchTerm);
+        scrapeShoprite(searchTerm);
         scrapePnp(searchTerm);
-        // scrapeCheckers(searchTerm);
+        scrapeCheckers(searchTerm);
     }
 
     private void scrapeShoprite(String searchTerm) {
