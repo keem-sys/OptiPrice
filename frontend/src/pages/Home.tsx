@@ -1,23 +1,31 @@
-import { Search } from 'lucide-react';
+import { Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
     return (
-        <div className="flex flex-col items-center justify-center pt-20">
-            <h1 className="text-5xl font-extrabold text-slate-900 mb-6 text-center">
-                Smart Grocery <span className="text-indigo-600">Comparison</span>
-            </h1>
-            <p className="text-lg text-slate-600 mb-10 max-w-2xl text-center">
-                Compare real-time prices across South Africa's biggest retailers using AI-powered matching.
-            </p>
+        <div className="flex flex-col items-center justify-center pt-24 pb-12 px-4">
+            <div className="text-center max-w-3xl">
+                <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight mb-6">
+                    Compare Prices with <span className="text-primary">AI Precision</span>
+                </h1>
+                <p className="text-xl text-muted-foreground mb-10">
+                    Real-time price aggregation across South Africa's leading retailers.
+                </p>
+            </div>
 
-            {/* Search Input Placeholder */}
-            <div className="w-full max-w-2xl relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-                <input
-                    type="text"
-                    placeholder="Search for milk, bread, or brand name..."
-                    className="w-full pl-12 pr-4 py-4 rounded-2xl border border-slate-200 bg-white shadow-xl shadow-slate-200/50 outline-none focus:ring-2 focus:ring-indigo-500 transition-all text-lg"
-                />
+            <div className="flex w-full max-w-2xl items-center space-x-2">
+                <div className="relative flex-grow">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
+                    <Input
+                        type="text"
+                        placeholder="Search for groceries (e.g. Milk, Bread, Clover)..."
+                        className="pl-10 py-6 text-lg rounded-full shadow-lg border-slate-200 focus-visible:ring-primary"
+                    />
+                </div>
+                <Button size="lg" className="rounded-full px-8 py-6 text-lg font-bold shadow-lg">
+                    Search
+                </Button>
             </div>
         </div>
     );
