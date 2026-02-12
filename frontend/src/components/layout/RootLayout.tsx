@@ -13,7 +13,7 @@ export default function RootLayout() {
                         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 text-white transition-transform group-hover:scale-110 shadow-lg shadow-indigo-200">
                             <ShoppingBasket size={24} />
                         </div>
-                        <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
+                        <span className="text-xl font-bold tracking-tight bg-linear-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
               OptiPrice
             </span>
                     </Link>

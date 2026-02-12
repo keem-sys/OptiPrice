@@ -1,5 +1,6 @@
 package com.optiprice.controller;
 
+import com.optiprice.dto.response.MasterProductResponse;
 import com.optiprice.dto.response.ProductSearchResponse;
 import com.optiprice.scraper.ScraperOrchestrator;
 import com.optiprice.service.ProductService;
@@ -17,7 +18,7 @@ public class CompareController {
     private  final ScraperOrchestrator scraperOrchestrator;
 
     @GetMapping("/compare")
-    public List<ProductSearchResponse> compareProducts(@RequestParam("item") String item) {
+    public List<MasterProductResponse> compareProducts(@RequestParam("item") String item) {
         return productService.searchProducts(item);
     }
 

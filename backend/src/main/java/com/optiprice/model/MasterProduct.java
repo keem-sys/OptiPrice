@@ -1,5 +1,6 @@
 package com.optiprice.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.List;
@@ -14,5 +15,6 @@ public class MasterProduct {
     private String category;
 
     @OneToMany(mappedBy = "masterProduct", fetch = FetchType.EAGER)
+    @JsonManagedReference
     private List<StoreItem> storeItems;
 }

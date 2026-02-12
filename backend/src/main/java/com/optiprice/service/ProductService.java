@@ -1,9 +1,13 @@
 package com.optiprice.service;
 
+import com.optiprice.dto.response.MasterProductResponse;
 import com.optiprice.dto.response.ProductSearchResponse;
+import com.optiprice.dto.response.StoreItemResponse;
+import com.optiprice.model.MasterProduct;
 import com.optiprice.model.PriceLog;
 import com.optiprice.model.Store;
 import com.optiprice.model.StoreItem;
+import com.optiprice.repository.MasterProductRepository;
 import com.optiprice.repository.PriceLogRepository;
 import com.optiprice.repository.StoreItemRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +25,7 @@ public class ProductService {
     private final StoreItemRepository itemRepository;
     private final PriceLogRepository priceLogRepository;
     private final MatchingService matchingService;
+    private final MasterProductRepository masterProductRepository;
 
     @Transactional
     public void processScrapedProduct(Store store, String externalId, String name,
@@ -59,22 +64,27 @@ public class ProductService {
         priceLogRepository.save(log);
     }
 
-    public List<ProductSearchResponse> searchProducts(String query) {
+    public List<MasterProductResponse> searchProducts(String query) {
+        List<MasterProduct> masters = masterProductRepository.searchByKeyword(query);
 
-        List<StoreItem> items = itemRepository.findByStoreSpecificNameContainingIgnoreCase(query);
-
-        return items.stream()
-                .map(item -> new ProductSearchResponse(
-                        item.getStore().getName(),
-                        item.getStore().getLogoUrl(),
-                        (item.getMasterProduct() != null)
-                                ? item.getMasterProduct().getGenericName()
-                                : item.getStoreSpecificName(),
-                        item.getCurrentPrice(),
-                        item.getBrand(),
-                        item.getImageUrl(),
-                        item.getProductUrl(),
-                        item.getLastUpdated()
+        // 2. Map to DTOs
+        return masters.stream()
+                .map(master -> new MasterProductResponse(
+                        master.getId(),
+                        master.getGenericName(),
+                        master.getCategory(),
+                        master.getStoreItems().stream()
+                                .map(item -> new StoreItemResponse(
+                                        item.getId(),
+                                        item.getStore().getName(),
+                                        item.getStore().getLogoUrl(),
+                                        item.getStoreSpecificName(),
+                                        item.getCurrentPrice(),
+                                        item.getProductUrl(),
+                                        item.getImageUrl(),
+                                        item.getLastUpdated()
+                                ))
+                                .toList()
                 ))
                 .toList();
     }

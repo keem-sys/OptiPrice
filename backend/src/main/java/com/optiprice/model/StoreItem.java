@@ -1,5 +1,6 @@
 package com.optiprice.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -36,5 +37,6 @@ public class StoreItem {
 
     @ManyToOne
     @JoinColumn(name = "master_product_id")
+    @JsonBackReference
     private MasterProduct masterProduct;
 }
