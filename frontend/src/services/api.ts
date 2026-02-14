@@ -1,5 +1,5 @@
 import axios from "axios";
-import type {MasterProduct} from "@/types";
+import type {MasterProduct, PagedResponse} from "@/types";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api";
 
@@ -10,14 +10,18 @@ const api = axios.create({
     },
 });
 
-export const searchProducts = async (query: string):
-    Promise<MasterProduct[]> => {
-    try {
-        const response = await api.get<MasterProduct[]>(
-            `/compare`, {
-                params: {item : query}
+export const searchProducts =
+    async (query: string, page = 0): Promise<PagedResponse<MasterProduct>> => {
+        try {
+            const response =
+                await api.get<PagedResponse<MasterProduct>>(`/compare`, {
+                params: {
+                    item: query,
+                    page: page,
+                    size: 12
+                }
             });
-        return response.data;
+            return response.data;
     } catch (error) {
         console.error("API error during search: ", error);
         throw error;

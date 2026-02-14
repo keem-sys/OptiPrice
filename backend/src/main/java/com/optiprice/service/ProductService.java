@@ -1,9 +1,6 @@
 package com.optiprice.service;
 
-import com.optiprice.dto.response.MasterProductResponse;
-import com.optiprice.dto.response.ProductSearchResponse;
-import com.optiprice.dto.response.StoreItemResponse;
-import com.optiprice.dto.response.StoreResponse;
+import com.optiprice.dto.response.*;
 import com.optiprice.model.MasterProduct;
 import com.optiprice.model.PriceLog;
 import com.optiprice.model.Store;
@@ -12,6 +9,10 @@ import com.optiprice.repository.MasterProductRepository;
 import com.optiprice.repository.PriceLogRepository;
 import com.optiprice.repository.StoreItemRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -65,10 +66,11 @@ public class ProductService {
         priceLogRepository.save(log);
     }
 
-    public List<MasterProductResponse> searchProducts(String query) {
-        List<MasterProduct> masters = masterProductRepository.searchByKeyword(query);
+    public PagedResponse<MasterProductResponse> searchProducts(String query, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("genericName").ascending());
+        Page<MasterProduct> productPage = masterProductRepository.searchByKeyword(query, pageable);
 
-        return masters.stream()
+        List<MasterProductResponse> content = productPage.getContent().stream()
                 .map(master -> new MasterProductResponse(
                         master.getId(),
                         master.getGenericName(),
@@ -92,6 +94,14 @@ public class ProductService {
                                 .toList()
                 ))
                 .toList();
+
+
+        return new PagedResponse<>(
+                content,
+                productPage.getNumber(),
+                productPage.getTotalElements(),
+                productPage.getTotalPages()
+        );
     }
 
     public MasterProductResponse getProductById(Long id) {

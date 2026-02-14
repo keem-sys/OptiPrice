@@ -1,6 +1,7 @@
 package com.optiprice.controller;
 
 import com.optiprice.dto.response.MasterProductResponse;
+import com.optiprice.dto.response.PagedResponse;
 import com.optiprice.dto.response.ProductSearchResponse;
 import com.optiprice.scraper.ScraperOrchestrator;
 import com.optiprice.service.ProductService;
@@ -18,8 +19,12 @@ public class CompareController {
     private  final ScraperOrchestrator scraperOrchestrator;
 
     @GetMapping("/compare")
-    public List<MasterProductResponse> compareProducts(@RequestParam("item") String item) {
-        return productService.searchProducts(item);
+    public PagedResponse<MasterProductResponse> compareProducts(
+            @RequestParam("item") String item,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size
+    ) {
+        return productService.searchProducts(item, page, size);
     }
 
     @GetMapping("/product/{id}")

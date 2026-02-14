@@ -1,3 +1,10 @@
+export interface PagedResponse<T> {
+    content: T[];
+    currentPage: number;
+    totalItems: number;
+    totalPages: number;
+}
+
 export interface Store {
     id: number;
     name: string;
