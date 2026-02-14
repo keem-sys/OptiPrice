@@ -8,7 +8,7 @@ export interface Store {
 export interface StoreItem {
     id: number;
     storeSpecificName: string;
-    currentPrice: number;
+    price: number;
     brand: string;
     imageUrl: string;
     productUrl: string;

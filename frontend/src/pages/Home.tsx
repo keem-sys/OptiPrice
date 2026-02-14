@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Hero } from "@/components/layout/Hero";
 import { searchProducts } from "@/services/api";
 import type {MasterProduct} from "@/types";
+import {ProductGrid} from "@/components/products/ProductGrid.tsx";
+import {Search} from "lucide-react";
 // import { ResultsGrid } from "@/components/products/ResultsGrid";
 
 export default function Home() {
@@ -30,25 +32,22 @@ export default function Home() {
         <div className="min-h-screen bg-slate-50 pb-20">
             <Hero onSearch={handleSearch} loading={loading} />
 
-            <div className="container mx-auto px-4">
+            <div className="container mx-auto px-4 pb-20">
                 {error && (
-                    <div className="p-4 mb-8 text-sm text-red-700 bg-red-100 rounded-lg max-w-2xl mx-auto text-center" role="alert">
+                    <div className="p-4 mb-8 text-sm text-red-700 bg-red-100 rounded-lg max-w-2xl mx-auto text-center">
                         <span className="font-medium">Error:</span> {error}
                     </div>
                 )}
 
-                {hasSearched && results.length === 0 && !loading && !error && (
-                    <div className="text-center py-10 text-slate-500">
-                        <p className="text-lg">No products found. Try a broader search term.</p>
-                    </div>
-                )}
+                <ProductGrid products={results} loading={loading} />
 
-                {results.length > 0 && (
-                    <div className="max-w-4xl mx-auto">
-                        <h2 className="text-2xl font-bold mb-4">Found {results.length} Results</h2>
-                        <pre className="bg-white p-4 rounded-xl shadow-sm overflow-auto text-xs">
-                     {JSON.stringify(results, null, 2)}
-                 </pre>
+                {hasSearched && !loading && results.length === 0 && !error && (
+                    <div className="flex flex-col items-center justify-center py-20 text-slate-400">
+                        <div className="bg-slate-100 p-6 rounded-full mb-4">
+                            <Search size={48} className="text-slate-300" />
+                        </div>
+                        <h3 className="text-xl font-semibold text-slate-700">No products found</h3>
+                        <p>Try searching for "Milk" or "Bread"</p>
                     </div>
                 )}
             </div>
