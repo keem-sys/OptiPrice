@@ -1,10 +1,10 @@
-import { Link } from "react-router-dom";
 import type {MasterProduct} from "@/types";
 import { formatCurrency } from "@/lib/formatters";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ShoppingBag, ArrowRight } from "lucide-react";
+import { Link, useSearchParams } from "react-router-dom";
 
 interface ProductCardProps {
     product: MasterProduct;
@@ -14,6 +14,8 @@ export function ProductCard({ product }: ProductCardProps) {
     const prices = product.storeItems.map((item) => item.price);
     const minPrice = Math.min(...prices);
     const maxPrice = Math.max(...prices);
+    const [searchParams] = useSearchParams();
+    const currentQuery = searchParams.get("q");
 
     const image = product.storeItems.find((i) => i.imageUrl)?.imageUrl
         || "https://placehold.co/400x400?text=No+Image";
@@ -71,7 +73,10 @@ export function ProductCard({ product }: ProductCardProps) {
                     </div>
 
                     <Button size="sm" asChild className="gap-2 bg-slate-900 text-white hover:bg-indigo-600 transition-colors">
-                        <Link to={`/product/${product.id}`}>
+                        <Link
+                            to={`/product/${product.id}`}
+                            state={{ previousSearch: currentQuery }}
+                        >
                             Compare <ArrowRight size={14} />
                         </Link>
                     </Button>

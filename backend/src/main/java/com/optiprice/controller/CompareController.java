@@ -22,6 +22,11 @@ public class CompareController {
         return productService.searchProducts(item);
     }
 
+    @GetMapping("/product/{id}")
+    public MasterProductResponse getProductById(@PathVariable Long id) {
+        return productService.getProductById(id);
+    }
+
     @PostMapping("/scrape")
     public String triggerScrape(@RequestParam("item") String item) {
         new Thread(() -> scraperOrchestrator.scrapeAllStores(item)).start();

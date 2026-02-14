@@ -4,13 +4,15 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
+
 interface HeroProps {
     onSearch: (query: string) => void;
     loading: boolean;
+    initialValue?: string;
 }
 
-export function Hero({ onSearch, loading }: HeroProps) {
-    const [query, setQuery] = useState("");
+export function Hero({ onSearch, loading, initialValue = "" }: HeroProps) {
+    const [query, setQuery] = useState(initialValue);
 
     const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -62,7 +64,7 @@ export function Hero({ onSearch, loading }: HeroProps) {
                                 size="lg"
                                 type="submit"
                                 disabled={loading}
-                                className="rounded-full bg-indigo-600 hover:bg-indigo-700 font-semibold px-6"
+                                className="rounded-full bg-indigo-600 hover:bg-indigo-700 font-semibold px-6 cursor-pointer"
                             >
                                 {loading ? "Scanning..." : "Search"}
                             </Button>

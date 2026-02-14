@@ -124,7 +124,7 @@
 }
 
 @theme {
-  --color-checkers: #38A8AE;
-  --color-shoprite: #ea212d;
-  --color-pnp: #003359;
+  --color-brand-checkers: #38A8AE;
+  --color-brand-shoprite: #ea212d;
+  --color-brand-pnp: #003359;
 }

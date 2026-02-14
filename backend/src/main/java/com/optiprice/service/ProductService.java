@@ -3,6 +3,7 @@ package com.optiprice.service;
 import com.optiprice.dto.response.MasterProductResponse;
 import com.optiprice.dto.response.ProductSearchResponse;
 import com.optiprice.dto.response.StoreItemResponse;
+import com.optiprice.dto.response.StoreResponse;
 import com.optiprice.model.MasterProduct;
 import com.optiprice.model.PriceLog;
 import com.optiprice.model.Store;
@@ -67,7 +68,6 @@ public class ProductService {
     public List<MasterProductResponse> searchProducts(String query) {
         List<MasterProduct> masters = masterProductRepository.searchByKeyword(query);
 
-        // 2. Map to DTOs
         return masters.stream()
                 .map(master -> new MasterProductResponse(
                         master.getId(),
@@ -76,8 +76,13 @@ public class ProductService {
                         master.getStoreItems().stream()
                                 .map(item -> new StoreItemResponse(
                                         item.getId(),
-                                        item.getStore().getName(),
-                                        item.getStore().getLogoUrl(),
+                                        new StoreResponse(
+                                                item.getStore().getId(),
+                                                item.getStore().getName(),
+                                                item.getStore().getLogoUrl(),
+                                                item.getStore().getWebsiteUrl()
+                                        ),
+                                        item.getBrand(),
                                         item.getStoreSpecificName(),
                                         item.getCurrentPrice(),
                                         item.getProductUrl(),
@@ -87,5 +92,33 @@ public class ProductService {
                                 .toList()
                 ))
                 .toList();
+    }
+
+    public MasterProductResponse getProductById(Long id) {
+        MasterProduct master = masterProductRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product with ID " + id + " not found"));
+
+        return new MasterProductResponse(
+                master.getId(),
+                master.getGenericName(),
+                master.getCategory(),
+                master.getStoreItems().stream()
+                        .map(item -> new StoreItemResponse(
+                                item.getId(),
+                                new StoreResponse(
+                                        item.getStore().getId(),
+                                        item.getStore().getName(),
+                                        item.getStore().getLogoUrl(),
+                                        item.getStore().getWebsiteUrl()
+                                ),
+                                item.getBrand(),
+                                item.getStoreSpecificName(),
+                                item.getCurrentPrice(),
+                                item.getProductUrl(),
+                                item.getImageUrl(),
+                                item.getLastUpdated()
+                        ))
+                        .toList()
+        );
     }
 }

@@ -7,13 +7,13 @@ export interface Store {
 
 export interface StoreItem {
     id: number;
+    store: Store;
+    brand: string;
     storeSpecificName: string;
     price: number;
-    brand: string;
-    imageUrl: string;
     productUrl: string;
+    imageUrl: string;
     lastUpdated: string;
-    store: Store;
 }
 
 export interface MasterProduct {

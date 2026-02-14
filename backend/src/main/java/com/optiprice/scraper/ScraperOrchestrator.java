@@ -1,6 +1,7 @@
 package com.optiprice.scraper;
 
 import com.optiprice.dto.checkers.CheckersProduct;
+import com.optiprice.dto.pnp.PnpImage;
 import com.optiprice.dto.pnp.PnpProduct;
 import com.optiprice.dto.shoprite.ShopriteProduct;
 import com.optiprice.model.Store;
@@ -104,7 +105,27 @@ public class ScraperOrchestrator {
                         ? BigDecimal.valueOf(p.price().value())
                         : BigDecimal.ZERO;
 
-                String img = (p.images() != null && !p.images().isEmpty()) ? p.images().get(0).url() : null;
+                String img = null;
+                if (p.images() != null && !p.images().isEmpty()) {
+                    img = p.images().stream()
+                            .filter(i -> "zoom".equalsIgnoreCase(i.format()))
+                            .findFirst()
+                            .map(PnpImage::url)
+                            .orElse(null);
+
+                    if (img == null) {
+                        img = p.images().stream()
+                                .filter(i -> "product".equalsIgnoreCase(i.format()))
+                                .findFirst()
+                                .map(PnpImage::url)
+                                .orElse(null);
+                    }
+
+                    if (img == null) {
+                        img = p.images().getFirst().url();
+                    }
+                }
+
                 String brand = (p.name().split("\\s+").length > 0) ? p.name().split("\\s+")[0] : "";
 
                 String productUrl = "https://www.pnp.co.za/p/" + p.code();

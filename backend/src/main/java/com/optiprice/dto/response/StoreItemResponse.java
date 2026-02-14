@@ -5,8 +5,8 @@ import java.time.OffsetDateTime;
 
 public record StoreItemResponse(
         Long id,
-        String store,
-        String storeLogoUrl,
+        StoreResponse store,
+        String brand,
         String storeSpecificName,
         BigDecimal price,
         String productUrl,

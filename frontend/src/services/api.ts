@@ -36,4 +36,14 @@ export const triggerScrape = async (query: string): Promise<string> => {
     }
 }
 
+export const getProductById = async (id: string): Promise<MasterProduct> => {
+    try {
+        const response = await api.get<MasterProduct>(`/product/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error("API Error fetching details:", error);
+        throw error;
+    }
+};
+
 export default api;
