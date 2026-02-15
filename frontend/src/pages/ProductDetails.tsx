@@ -3,6 +3,7 @@ import { useProductDetails } from "@/hooks/useProducts"; // Hook
 import { ComparisonTable } from "@/components/products/ComparisonTable";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Loader2, AlertCircle } from "lucide-react";
+import {PriceHistoryChart} from "@/components/products/PriceHistoryChart.tsx";
 
 export default function ProductDetails() {
     const { id } = useParams<{ id: string }>();
@@ -56,6 +57,10 @@ export default function ProductDetails() {
             <div className="space-y-6">
                 <h2 className="text-xl font-semibold text-slate-800">Live Price Comparison</h2>
                 <ComparisonTable items={product.storeItems} />
+            </div>
+
+            <div className="mt-12">
+                {id && <PriceHistoryChart masterId={id} />}
             </div>
         </div>
     );

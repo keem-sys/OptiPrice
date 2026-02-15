@@ -26,7 +26,7 @@ export default function Home() {
         if (debouncedSearchTerm !== queryInUrl) {
             setSearchParams(
                 debouncedSearchTerm ? { q: debouncedSearchTerm } : {},
-                { replace: true, preventScrollReset: true }
+                { replace: true }
             );
         }
     }, [debouncedSearchTerm, queryInUrl, setSearchParams]);
@@ -36,7 +36,9 @@ export default function Home() {
         pageInUrl
     );
 
-    const results = data?.content || [];
+
+    const results = queryInUrl ? (data?.content || []) : [];
+
     const totalPages = data?.totalPages || 0;
 
     const handleSearchInput = (query: string) => {
@@ -46,7 +48,6 @@ export default function Home() {
     const handlePageChange = (newPage: number) => {
         setSearchParams(
             { q: queryInUrl, p: newPage.toString() },
-            { preventScrollReset: true }
         );
     };
 
@@ -66,12 +67,14 @@ export default function Home() {
                     </div>
                 )}
 
-                <ProductGrid
-                    products={results}
-                    loading={isLoading || (isFetching && !data)}
-                />
+                {queryInUrl && (
+                    <ProductGrid
+                        products={results}
+                        loading={isLoading || (isFetching && !data)}
+                    />
+                )}
 
-                {!isLoading && !isError && totalPages > 1 && (
+                {!isLoading && !isError && results.length > 0 && totalPages > 1 && (
                     <div className="mt-12 animate-in fade-in slide-in-from-bottom-4">
                         <Pagination>
                             <PaginationContent>

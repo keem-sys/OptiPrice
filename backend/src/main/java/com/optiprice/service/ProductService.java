@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,78 +22,16 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ProductService {
-
-    private final StoreItemRepository itemRepository;
-    private final PriceLogRepository priceLogRepository;
-    private final MatchingService matchingService;
     private final MasterProductRepository masterProductRepository;
-
-    @Transactional
-    public void processScrapedProduct(Store store, String externalId, String name,
-                                      String brand, BigDecimal price,
-                                      String imageUrl, String productUrl) {
-
-        OffsetDateTime now = OffsetDateTime.now();
-        StoreItem item = itemRepository.findByExternalIdAndStore(externalId, store)
-                .orElse(new StoreItem());
-
-        if (item.getId() == null) {
-            item.setStore(store);
-            item.setExternalId(externalId);
-        }
-
-        item.setStoreSpecificName(name);
-        item.setBrand(brand);
-        item.setCurrentPrice(price);
-        item.setLastUpdated(now);
-
-        if (imageUrl != null) item.setImageUrl(imageUrl);
-        if (productUrl != null) item.setProductUrl(productUrl);
-
-        StoreItem savedItem = itemRepository.save(item);
-
-        if (savedItem.getMasterProduct() == null) {
-            matchingService.findOrCreateMasterProduct(savedItem);
-        }
-
-        PriceLog log = PriceLog.builder()
-                .price(price)
-                .timestamp(now)
-                .storeItem(savedItem)
-                .build();
-
-        priceLogRepository.save(log);
-    }
+    private final PriceLogRepository priceLogRepository;
 
     public PagedResponse<MasterProductResponse> searchProducts(String query, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("genericName").ascending());
+        Pageable pageable = PageRequest.of(page, size);
         Page<MasterProduct> productPage = masterProductRepository.searchByKeyword(query, pageable);
 
         List<MasterProductResponse> content = productPage.getContent().stream()
-                .map(master -> new MasterProductResponse(
-                        master.getId(),
-                        master.getGenericName(),
-                        master.getCategory(),
-                        master.getStoreItems().stream()
-                                .map(item -> new StoreItemResponse(
-                                        item.getId(),
-                                        new StoreResponse(
-                                                item.getStore().getId(),
-                                                item.getStore().getName(),
-                                                item.getStore().getLogoUrl(),
-                                                item.getStore().getWebsiteUrl()
-                                        ),
-                                        item.getBrand(),
-                                        item.getStoreSpecificName(),
-                                        item.getCurrentPrice(),
-                                        item.getProductUrl(),
-                                        item.getImageUrl(),
-                                        item.getLastUpdated()
-                                ))
-                                .toList()
-                ))
+                .map(this::mapToMasterProductResponse)
                 .toList();
-
 
         return new PagedResponse<>(
                 content,
@@ -104,31 +41,48 @@ public class ProductService {
         );
     }
 
+    public List<PriceHistoryPoint> getPriceHistory(Long masterId) {
+        return priceLogRepository.findHistoryByMasterId(masterId);
+    }
+
     public MasterProductResponse getProductById(Long id) {
-        MasterProduct master = masterProductRepository.findById(id)
+        return masterProductRepository.findById(id)
+                .map(this::mapToMasterProductResponse)
                 .orElseThrow(() -> new RuntimeException("Product with ID " + id + " not found"));
+    }
+
+
+    private MasterProductResponse mapToMasterProductResponse(MasterProduct master) {
+        List<StoreItemResponse> itemResponses = master.getStoreItems().stream()
+                .map(this::mapToStoreItemResponse)
+                .toList();
 
         return new MasterProductResponse(
                 master.getId(),
                 master.getGenericName(),
                 master.getCategory(),
-                master.getStoreItems().stream()
-                        .map(item -> new StoreItemResponse(
-                                item.getId(),
-                                new StoreResponse(
-                                        item.getStore().getId(),
-                                        item.getStore().getName(),
-                                        item.getStore().getLogoUrl(),
-                                        item.getStore().getWebsiteUrl()
-                                ),
-                                item.getBrand(),
-                                item.getStoreSpecificName(),
-                                item.getCurrentPrice(),
-                                item.getProductUrl(),
-                                item.getImageUrl(),
-                                item.getLastUpdated()
-                        ))
-                        .toList()
+                itemResponses
+        );
+    }
+
+
+    private StoreItemResponse mapToStoreItemResponse(StoreItem item) {
+        StoreResponse storeDto = new StoreResponse(
+                item.getStore().getId(),
+                item.getStore().getName(),
+                item.getStore().getLogoUrl(),
+                item.getStore().getWebsiteUrl()
+        );
+
+        return new StoreItemResponse(
+                item.getId(),
+                storeDto,
+                item.getBrand(),
+                item.getStoreSpecificName(),
+                item.getCurrentPrice(),
+                item.getProductUrl(),
+                item.getImageUrl(),
+                item.getLastUpdated()
         );
     }
 }

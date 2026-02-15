@@ -3,6 +3,8 @@ package com.optiprice.model;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
+
 import java.util.List;
 
 @Entity
@@ -14,6 +16,7 @@ public class MasterProduct {
     private String genericName;
     private String category;
 
+    @BatchSize(size = 20)
     @OneToMany(mappedBy = "masterProduct", fetch = FetchType.EAGER)
     @JsonManagedReference
     private List<StoreItem> storeItems;

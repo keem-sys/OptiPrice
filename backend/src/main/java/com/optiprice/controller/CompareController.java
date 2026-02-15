@@ -2,6 +2,7 @@ package com.optiprice.controller;
 
 import com.optiprice.dto.response.MasterProductResponse;
 import com.optiprice.dto.response.PagedResponse;
+import com.optiprice.dto.response.PriceHistoryPoint;
 import com.optiprice.dto.response.ProductSearchResponse;
 import com.optiprice.scraper.ScraperOrchestrator;
 import com.optiprice.service.ProductService;
@@ -30,6 +31,11 @@ public class CompareController {
     @GetMapping("/product/{id}")
     public MasterProductResponse getProductById(@PathVariable Long id) {
         return productService.getProductById(id);
+    }
+
+    @GetMapping("/product/{id}/history")
+    public List<PriceHistoryPoint> getProductHistory(@PathVariable Long id) {
+        return productService.getPriceHistory(id);
     }
 
     @PostMapping("/scrape")

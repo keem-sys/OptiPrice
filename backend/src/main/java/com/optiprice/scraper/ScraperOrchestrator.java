@@ -6,6 +6,7 @@ import com.optiprice.dto.pnp.PnpProduct;
 import com.optiprice.dto.shoprite.ShopriteProduct;
 import com.optiprice.model.Store;
 import com.optiprice.service.ProductService;
+import com.optiprice.service.StoreItemService;
 import com.optiprice.service.StoreService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,7 +23,7 @@ public class ScraperOrchestrator {
     private final ShopriteScraper shopriteScraper;
 
     private final StoreService storeService;
-    private final ProductService productService;
+    private final StoreItemService storeItemService;
 
     public void scrapeAllStores(String searchTerm) {
         System.out.println("--- Orchestrating Scrape for: " + searchTerm + " ---");
@@ -44,7 +45,7 @@ public class ScraperOrchestrator {
 
                 String productUrl = p.productUrl();
 
-                productService.processScrapedProduct(
+                storeItemService.saveOrUpdateItem(
                         shoprite,
                         p.id(),
                         p.name(),
@@ -76,7 +77,7 @@ public class ScraperOrchestrator {
                 if (brand == null || brand.trim().isEmpty()) {
                     brand = (name.split("\\s+").length > 0) ? name.split("\\s+")[0] : "Unknown";
                 }
-                productService.processScrapedProduct(
+                storeItemService.saveOrUpdateItem(
                         checkers, p.id(), name, brand,
                         BigDecimal.valueOf(p.getPriceValue()),
                         p.getImageUrl(), productUrl
@@ -130,7 +131,7 @@ public class ScraperOrchestrator {
 
                 String productUrl = "https://www.pnp.co.za/p/" + p.code();
 
-                productService.processScrapedProduct(
+                storeItemService.saveOrUpdateItem(
                         pnp, p.code(), p.name(), brand, price, img,
                         productUrl
                 );

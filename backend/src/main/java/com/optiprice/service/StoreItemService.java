@@ -18,7 +18,7 @@ public class StoreItemService {
 
     private final StoreItemRepository itemRepo;
     private final PriceLogRepository priceLogRepo;
-
+    private final MatchingService matchingService;
 
     @Transactional
     public void saveOrUpdateItem(Store store, String externalId, String name, String brand,
@@ -43,6 +43,10 @@ public class StoreItemService {
         if (productUrl != null) item.setProductUrl(productUrl);
 
         StoreItem savedItem = itemRepo.save(item);
+
+        if (savedItem.getMasterProduct() == null) {
+            matchingService.findOrCreateMasterProduct(savedItem);
+        }
 
         PriceLog log = PriceLog.builder()
                 .price(price)

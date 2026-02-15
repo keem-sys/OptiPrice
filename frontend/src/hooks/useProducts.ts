@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { searchProducts, getProductById } from '@/services/api';
+import {searchProducts, getProductById, getPriceHistory} from '@/services/api';
 import  type { MasterProduct } from '@/types';
 
 export const useSearchProducts = (query: string, page: number) => {
@@ -20,5 +20,13 @@ export const useProductDetails = (id: string) => {
         queryFn: () => getProductById(id),
         enabled: !!id,
         retry: false,
+    });
+};
+
+export const usePriceHistory = (id: string) => {
+    return useQuery({
+        queryKey: ['product', id, 'history'],
+        queryFn: () => getPriceHistory(id),
+        enabled: !!id,
     });
 };

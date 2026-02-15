@@ -50,4 +50,15 @@ export const getProductById = async (id: string): Promise<MasterProduct> => {
     }
 };
 
+export interface PriceHistoryPoint {
+    date: string;
+    storeName: string;
+    price: number;
+}
+
+export const getPriceHistory = async (id: string): Promise<PriceHistoryPoint[]> => {
+    const response = await api.get<PriceHistoryPoint[]>(`/product/${id}/history`);
+    return response.data;
+};
+
 export default api;
