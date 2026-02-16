@@ -14,6 +14,8 @@ import java.util.List;
 public interface MasterProductRepository extends JpaRepository<MasterProduct, Long> {
     List<MasterProduct> findByGenericNameContainingIgnoreCase(String name);
     List<MasterProduct> findByCategoryIgnoreCase(String category);
+    @Query("SELECT DISTINCT m.genericName FROM MasterProduct m")
+    List<String> findAllTrackedProductNames();
 
     /**
      * ADVANCED SEARCH

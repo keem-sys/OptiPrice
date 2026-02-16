@@ -8,6 +8,8 @@ import com.optiprice.dto.pnp.PnpResponse;
 import com.optiprice.dto.pnp.PnpProduct;
 import org.springframework.stereotype.Service;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -46,7 +48,8 @@ public class PnpScraper {
                 }
             });
 
-            String searchUrl = "https://www.pnp.co.za/search/" + searchTerm;
+            String encodedSearch = URLEncoder.encode(searchTerm, StandardCharsets.UTF_8);
+            String searchUrl = "https://www.pnp.co.za/search/" + encodedSearch;
             System.out.println("PnP: Navigating to " + searchUrl);
 
             page.navigate(searchUrl, new Page.NavigateOptions().setWaitUntil(WaitUntilState.DOMCONTENTLOADED));

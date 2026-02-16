@@ -6,10 +6,12 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 
 @SpringBootApplication
 @EnableAsync
+@EnableScheduling
 public class OptiPriceApplication {
 
 	public static void main(String[] args) {
@@ -19,9 +21,9 @@ public class OptiPriceApplication {
 	@Bean
 	CommandLineRunner testFullShops(ScraperOrchestrator orchestrator) {
 		return args -> {
-			System.out.println("PHASE 1: STARTING FULL SHOPS SCRAPE");
+			System.out.println("STARTING FULL SHOPS SCRAPE");
 				orchestrator.scrapeAllStores("milk");
-			System.out.println("PHASE 1 COMPLETE: DATA SHOULD BE PERSISTED");
+			System.out.println("COMPLETE: DATA SHOULD BE PERSISTED");
 		};
 	}
 }

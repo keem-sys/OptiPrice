@@ -7,6 +7,8 @@ import com.optiprice.dto.checkers.CheckersProduct;
 import com.optiprice.dto.checkers.CheckersResponse;
 import org.springframework.stereotype.Service;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -67,7 +69,8 @@ public class CheckersScraper {
                 }
             });
 
-            String searchUrl = "https://www.checkers.co.za/search?Search=" + searchTerm;
+            String encodedSearch = URLEncoder.encode(searchTerm, StandardCharsets.UTF_8);
+            String searchUrl = "https://www.checkers.co.za/search?Search=" + encodedSearch;
             System.out.println("Navigating to: " + searchUrl);
             page.navigate(searchUrl);
 
