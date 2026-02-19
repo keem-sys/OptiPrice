@@ -23,9 +23,21 @@ public class MatchingService {
     private final Semaphore aiPermits = new Semaphore(5);
 
     public void findOrCreateMasterProduct(StoreItem item) {
+        findOrCreateMasterProduct(item, null);
+    }
+
+
+    public void findOrCreateMasterProduct(StoreItem item, String knownCategory) {
         try {
             aiPermits.acquire();
-            String category = predictCategory(item.getStoreSpecificName());
+            String category;
+
+            if (knownCategory != null && !knownCategory.trim().isEmpty()) {
+                category = knownCategory;
+            } else {
+                category = predictCategory(item.getStoreSpecificName());
+            }
+
             String itemLabel = item.getBrand() + " " + item.getStoreSpecificName();
 
             List<Document> similarProducts = vectorStore.similaritySearch(
@@ -77,7 +89,6 @@ public class MatchingService {
                 }
             } catch (Exception e) {
                 System.err.println("AI Matching failed: " + e.getMessage());
-                // IF ALL HELL BREAK LOOSE DUPLICATE
                 masterProductService.createNewMasterProduct(item, category);
             }
         }  catch (InterruptedException e) {

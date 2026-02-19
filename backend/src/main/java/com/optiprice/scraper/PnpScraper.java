@@ -4,6 +4,7 @@ import com.microsoft.playwright.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.microsoft.playwright.options.WaitUntilState;
+import com.optiprice.dto.checkers.CheckersProduct;
 import com.optiprice.dto.pnp.PnpResponse;
 import com.optiprice.dto.pnp.PnpProduct;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,18 @@ public class PnpScraper {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public List<PnpProduct> scrapeProducts(String searchTerm) {
+        String encoded = URLEncoder.encode(searchTerm, StandardCharsets.UTF_8);
+        String url = "https://www.pnp.co.za/search/" + encoded;
+        System.out.println("PNP: Scraping Search Term: " + url);
+        return scrapeInternal(url);
+    }
+
+    public List<PnpProduct> scrapeCategory(String categoryUrl) {
+        System.out.println("PNP: Scraping Category URL: " + categoryUrl);
+        return scrapeInternal(categoryUrl);
+    }
+
+    public List<PnpProduct> scrapeInternal(String targetUrl) {
         try (Playwright playwright = Playwright.create()) {
 
             Browser browser = playwright.chromium().launch(new BrowserType.LaunchOptions()
@@ -48,11 +61,7 @@ public class PnpScraper {
                 }
             });
 
-            String encodedSearch = URLEncoder.encode(searchTerm, StandardCharsets.UTF_8);
-            String searchUrl = "https://www.pnp.co.za/search/" + encodedSearch;
-            System.out.println("PnP: Navigating to " + searchUrl);
-
-            page.navigate(searchUrl, new Page.NavigateOptions().setWaitUntil(WaitUntilState.DOMCONTENTLOADED));
+            page.navigate(targetUrl, new Page.NavigateOptions().setWaitUntil(WaitUntilState.DOMCONTENTLOADED));
 
             page.waitForTimeout(2000);
             page.mouse().wheel(0, 400);
@@ -75,7 +84,7 @@ public class PnpScraper {
             System.err.println("PnP Scraper Error: " + e.getMessage());
         }
 
-        System.out.println("⚠ PnP: No data captured after waiting.");
+        System.out.println("PnP: No data captured after waiting.");
         return new ArrayList<>();
     }
 }

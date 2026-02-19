@@ -21,10 +21,11 @@ public class StoreItemService {
     private final StoreItemRepository itemRepo;
     private final PriceLogRepository priceLogRepo;
     private final ApplicationEventPublisher eventPublisher;
+    private final MasterProductService masterProductService;
 
     @Transactional
     public void saveOrUpdateItem(Store store, String externalId, String name, String brand,
-                                 BigDecimal price, String imageUrl, String productUrl) {
+                                 BigDecimal price, String imageUrl, String productUrl, String knownCategory) {
 
         OffsetDateTime now = OffsetDateTime.now();
 
@@ -47,7 +48,11 @@ public class StoreItemService {
         StoreItem savedItem = itemRepo.save(item);
 
         if (savedItem.getMasterProduct() == null) {
-            eventPublisher.publishEvent(new ProductScrapedEvent(savedItem.getId()));
+            if (knownCategory != null) {
+                masterProductService.createMasterProductWithKnownCategory(savedItem, knownCategory);
+            } else {
+                eventPublisher.publishEvent(new ProductScrapedEvent(savedItem.getId()));
+            }
         }
 
         PriceLog log = PriceLog.builder()

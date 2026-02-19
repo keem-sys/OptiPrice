@@ -48,6 +48,12 @@ public class MasterProductService {
     }
 
     @Transactional
+    public void createMasterProductWithKnownCategory(StoreItem storeItem, String knownCategory) {
+        System.out.println("DB: Creating Master Product with KNOWN Category: [" + knownCategory + "]");
+        createNewMasterProduct(storeItem, knownCategory);
+    }
+
+    @Transactional
     public void linkToExistingMaster(StoreItem item, String masterIdString, String fallbackCategory) {
         try {
             String cleanId = masterIdString.replaceAll("[^0-9]", "");

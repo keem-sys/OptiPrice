@@ -13,16 +13,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-/**
- * Scraper for Checkers Sixty60 product data
- * Intercepts the POST request to /api/catalogue/get-products-filter
- */
 @Service
 public class CheckersScraper {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public List<CheckersProduct> scrapeProducts(String searchTerm) {
+        String encoded = URLEncoder.encode(searchTerm, StandardCharsets.UTF_8);
+        String url = "https://www.checkers.co.za/search?Search=" + encoded;
+        System.out.println("Checkers: Scraping Search Term: " + url);
+        return scrapeInternal(url);
+    }
+
+    public List<CheckersProduct> scrapeCategory(String categoryUrl) {
+        System.out.println("Checkers: Scraping Category URL: " + categoryUrl);
+        return scrapeInternal(categoryUrl);
+    }
+
+    public List<CheckersProduct> scrapeInternal(String targetUrl) {
         try (Playwright playwright = Playwright.create()) {
 
             List<String> args = new ArrayList<>();
@@ -60,8 +68,6 @@ public class CheckersScraper {
                         !url.contains("filter-options")) {
                     try {
                         String responseBody = response.text();
-                        System.out.println("Captured product data from: " + url);
-                        System.out.println("Response size: " + responseBody.length() + " characters");
                         jsonCapture.set(responseBody);
                     } catch (Exception e) {
                         System.err.println("Error reading response: " + e.getMessage());
@@ -69,10 +75,7 @@ public class CheckersScraper {
                 }
             });
 
-            String encodedSearch = URLEncoder.encode(searchTerm, StandardCharsets.UTF_8);
-            String searchUrl = "https://www.checkers.co.za/search?Search=" + encodedSearch;
-            System.out.println("Navigating to: " + searchUrl);
-            page.navigate(searchUrl);
+            page.navigate(targetUrl);
 
             for (int i = 0; i < 20; i++) {
                 if (jsonCapture.get() != null) {
@@ -87,7 +90,7 @@ public class CheckersScraper {
             if (jsonCapture.get() != null) {
                 return parseProducts(jsonCapture.get());
             } else {
-                System.err.println("No API response captured for search term: " + searchTerm);
+                System.err.println("No API response captured for url" + targetUrl);
             }
 
         } catch (Exception e) {

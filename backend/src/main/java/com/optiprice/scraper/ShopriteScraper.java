@@ -2,6 +2,7 @@ package com.optiprice.scraper;
 
 import com.microsoft.playwright.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.optiprice.dto.pnp.PnpProduct;
 import com.optiprice.dto.shoprite.ShopriteProduct;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +17,18 @@ public class ShopriteScraper {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public List<ShopriteProduct> scrapeProducts(String searchTerm) {
+        String encoded = URLEncoder.encode(searchTerm, StandardCharsets.UTF_8);
+        String url = "https://www.shoprite.co.za/search/all?q=" + encoded;
+        System.out.println("Shoprite: Scraping Search Term: " + url);
+        return scrapeInternal(url);
+    }
+
+    public List<ShopriteProduct> scrapeCategory(String categoryUrl) {
+        System.out.println("Shoprite: Scraping Category URL: " + categoryUrl);
+        return scrapeInternal(categoryUrl);
+    }
+
+    public List<ShopriteProduct> scrapeInternal(String targetUrl) {
         List<ShopriteProduct> products = new ArrayList<>();
 
         try (Playwright playwright = Playwright.create()) {
@@ -28,11 +41,8 @@ public class ShopriteScraper {
 
             Page page = context.newPage();
 
-            String encodedSearch = URLEncoder.encode(searchTerm, StandardCharsets.UTF_8);
-            String url = "https://www.shoprite.co.za/search/all?q=" + encodedSearch;
 
-            System.out.println("Navigating to Shoprite: " + url);
-            page.navigate(url);
+            page.navigate(targetUrl);
 
 
             try {
