@@ -13,6 +13,7 @@ public class StoreService {
 
     private final StoreRepository storeRepository;
 
+    @Transactional
     @Cacheable(value = "stores", key = "#name")
     public Store getOrCreateStore(String name, String logoUrl, String websiteUrl) {
         System.out.println("Database Hit: Fetching/Creating Store -> " + name);

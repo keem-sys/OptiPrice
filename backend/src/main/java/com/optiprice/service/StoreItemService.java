@@ -7,6 +7,7 @@ import com.optiprice.model.StoreItem;
 import com.optiprice.repository.PriceLogRepository;
 import com.optiprice.repository.StoreItemRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +25,8 @@ public class StoreItemService {
     private final MasterProductService masterProductService;
 
     @Transactional
-    public void saveOrUpdateItem(Store store, String externalId, String name, String brand,
+    @CacheEvict(value = "history", key = "#result.masterProduct.id", condition = "#result.masterProduct != null")
+    public StoreItem saveOrUpdateItem(Store store, String externalId, String name, String brand,
                                  BigDecimal price, String imageUrl, String productUrl, String knownCategory) {
 
         OffsetDateTime now = OffsetDateTime.now();
@@ -62,5 +64,6 @@ public class StoreItemService {
                 .build();
 
         priceLogRepo.save(log);
+        return savedItem;
     }
 }

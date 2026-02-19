@@ -9,6 +9,7 @@ import com.optiprice.repository.MasterProductRepository;
 import com.optiprice.repository.PriceLogRepository;
 import com.optiprice.repository.StoreItemRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -41,6 +42,7 @@ public class ProductService {
         );
     }
 
+    @Cacheable(value = "history", key = "#masterId")
     public List<PriceHistoryPoint> getPriceHistory(Long masterId) {
         return priceLogRepository.findHistoryByMasterId(masterId);
     }
