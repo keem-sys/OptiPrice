@@ -1,6 +1,6 @@
 package com.optiprice.scheduler;
 
-import com.optiprice.repository.StoreItemRepository; // Change from MasterProductRepository
+import com.optiprice.repository.StoreItemRepository;
 import com.optiprice.scraper.ScraperOrchestrator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

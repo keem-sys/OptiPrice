@@ -19,13 +19,4 @@ public class OptiPriceApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(OptiPriceApplication.class, args);
 	}
-
-	@Bean
-	CommandLineRunner testFullShops(ScraperOrchestrator orchestrator) {
-		return args -> {
-			System.out.println("STARTING FULL SHOPS SCRAPE");
-				orchestrator.scrapeAllStores("milk");
-			System.out.println("COMPLETE: DATA SHOULD BE PERSISTED");
-		};
-	}
 }
