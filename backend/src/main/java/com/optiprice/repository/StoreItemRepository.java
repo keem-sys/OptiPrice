@@ -14,7 +14,7 @@ import java.util.Optional;
 @Repository
 public interface StoreItemRepository extends JpaRepository<StoreItem, Long> {
     Optional<StoreItem> findByExternalIdAndStore(String externalId, Store store);
-    List<StoreItem> findByStoreSpecificNameContainingIgnoreCase(String storeSpecificName);
+    List<StoreItem> findByMasterProductIsNull();
     @Query("SELECT DISTINCT si.masterProduct.genericName " +
             "FROM StoreItem si " +
             "WHERE si.lastUpdated < :threshold")

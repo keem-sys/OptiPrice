@@ -4,7 +4,7 @@ import com.microsoft.playwright.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.microsoft.playwright.options.WaitUntilState;
-import com.optiprice.dto.checkers.CheckersProduct;
+import com.optiprice.dto.pnp.PnpImage;
 import com.optiprice.dto.pnp.PnpResponse;
 import com.optiprice.dto.pnp.PnpProduct;
 import org.springframework.stereotype.Service;
@@ -87,4 +87,6 @@ public class PnpScraper {
         System.out.println("PnP: No data captured after waiting.");
         return new ArrayList<>();
     }
+
+
 }

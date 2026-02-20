@@ -104,13 +104,7 @@ public class ScraperOrchestrator {
                         ? BigDecimal.valueOf(p.price().value())
                         : BigDecimal.ZERO;
 
-                String img = null;
-                if (p.images() != null && !p.images().isEmpty()) {
-                    img = p.images().stream().filter(i -> "zoom".equalsIgnoreCase(i.format())).findFirst()
-                            .map(PnpImage::url).orElse(null);
-                    if (img == null) img = p.images().getFirst().url();
-                }
-
+                String img = findBestPnpImage(p.images());
                 String brand = (p.name().split("\\s+").length > 0) ? p.name().split("\\s+")[0] : "";
                 String productUrl = "https://www.pnp.co.za/p/" + p.code();
 
@@ -164,5 +158,27 @@ public class ScraperOrchestrator {
         return storeService.getOrCreateStore("Pick n Pay",
                 "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Pick_n_Pay_logo.svg/2560px-Pick_n_Pay_logo.svg.png",
                 "https://pnp.co.za/");
+    }
+
+    private String findBestPnpImage(List<PnpImage> images) {
+        if (images == null || images.isEmpty()) return null;
+
+        for (PnpImage img : images) {
+            if (img.url() != null) {
+                if (img.url().contains("400Wx400H")) return img.url();
+                if (img.url().contains("300Wx300H")) return img.url();
+                if (img.url().contains("515Wx515H")) return img.url();
+            }
+        }
+
+        for (PnpImage img : images) {
+            if ("product".equalsIgnoreCase(img.format())) return img.url();
+        }
+
+        for (PnpImage img : images) {
+            if ("zoom".equalsIgnoreCase(img.format())) return img.url();
+        }
+
+        return images.getFirst().url();
     }
 }
