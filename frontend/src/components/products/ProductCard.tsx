@@ -10,16 +10,32 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
-    const prices = product.storeItems.map((item) => item.price);
-    const minPrice = Math.min(...prices);
-    const maxPrice = Math.max(...prices);
     const [searchParams] = useSearchParams();
     const currentQuery = searchParams.get("q");
+
+    const storeCount = product.storeItems.length;
+
+    if (storeCount === 0) {
+        return (
+            <Card className="h-full bg-slate-50 opacity-60">
+                <CardContent className="p-5 flex items-center justify-center h-full">
+                    <span className="text-slate-400 font-medium">Currently Unavailable</span>
+                </CardContent>
+            </Card>
+        );
+    }
+
+    /* if (!product.storeItems || product.storeItems.length === 0) {
+        return null;
+    } */
+
+    const prices = product.storeItems.map((item) => item.price);
+    const minPrice = prices.length > 0 ? Math.min(...prices) : 0;
+    const maxPrice = prices.length > 0 ? Math.max(...prices) : 0;
 
     const image = product.storeItems.find((i) => i.imageUrl)?.imageUrl
         || "https://placehold.co/400x400?text=No+Image";
 
-    const storeCount = product.storeItems.length;
 
     return (
         <Card className="group relative h-full overflow-hidden border-slate-200 bg-white

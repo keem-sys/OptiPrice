@@ -1,5 +1,6 @@
 import { Outlet, ScrollRestoration } from 'react-router-dom';
-import { Navbar } from './Navbar'; // Import the new component
+import { Navbar } from "./Navbar";
+import { Footer } from "./Footer";
 
 export default function RootLayout() {
     return (
@@ -12,11 +13,7 @@ export default function RootLayout() {
                 <Outlet />
             </main>
 
-            <footer className="border-t border-slate-200 bg-white py-8 mt-auto">
-                <div className="container mx-auto px-4 text-center text-sm text-slate-500">
-                    &copy; {new Date().getFullYear()} OptiPrice.
-                </div>
-            </footer>
+            <Footer />
         </div>
     );
 }

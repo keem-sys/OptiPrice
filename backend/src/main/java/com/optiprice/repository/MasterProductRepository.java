@@ -14,54 +14,49 @@ import java.util.List;
 public interface MasterProductRepository extends JpaRepository<MasterProduct, Long> {
     List<MasterProduct> findByGenericNameContainingIgnoreCase(String name);
     List<MasterProduct> findByCategoryIgnoreCase(String category);
+
     @Query("SELECT DISTINCT m.genericName FROM MasterProduct m")
     List<String> findAllTrackedProductNames();
 
-    /**
-     * ADVANCED SEARCH
-     * Joins MasterProduct, StoreItem, AND Store tables.
-     * Concatenates all text (Product Name + Brand + Store Name).
-     * Uses 'websearch_to_tsquery'
-     */
     @Query(value = """
-        SELECT m.* 
-        FROM master_product m
-        LEFT JOIN store_item si ON m.id = si.master_product_id
-        LEFT JOIN store s ON si.store_id = s.id
-        WHERE 
-            to_tsvector('english', 
-                COALESCE(m.generic_name, '') || ' ' || 
-                COALESCE(m.category, '') || ' ' || 
-                COALESCE(si.store_specific_name, '') || ' ' || 
-                COALESCE(si.brand, '') || ' ' || 
-                COALESCE(s.name, '')
-            ) 
-            @@ websearch_to_tsquery('english', :query)
-        GROUP BY m.id
-        ORDER BY MAX(ts_rank(
-            to_tsvector('english', 
-                COALESCE(m.generic_name, '') || ' ' || 
-                COALESCE(si.brand, '') || ' ' || 
-                COALESCE(s.name, '')
-            ), 
-            websearch_to_tsquery('english', :query)
-        )) DESC
-        """,
+    SELECT m.* 
+    FROM master_product m
+    JOIN store_item si ON m.id = si.master_product_id  -- CHANGED FROM LEFT JOIN TO JOIN
+    JOIN store s ON si.store_id = s.id                 -- CHANGED FROM LEFT JOIN TO JOIN
+    WHERE 
+        to_tsvector('english', 
+            COALESCE(m.generic_name, '') || ' ' || 
+            COALESCE(m.category, '') || ' ' || 
+            COALESCE(si.store_specific_name, '') || ' ' || 
+            COALESCE(si.brand, '') || ' ' || 
+            COALESCE(s.name, '')
+        ) 
+        @@ websearch_to_tsquery('english', :query)
+    GROUP BY m.id
+    ORDER BY MAX(ts_rank(
+        to_tsvector('english', 
+            COALESCE(m.generic_name, '') || ' ' || 
+            COALESCE(si.brand, '') || ' ' || 
+            COALESCE(s.name, '')
+        ), 
+        websearch_to_tsquery('english', :query)
+    )) DESC
+    """,
             countQuery = """
-        SELECT COUNT(DISTINCT m.id)
-        FROM master_product m
-        LEFT JOIN store_item si ON m.id = si.master_product_id
-        LEFT JOIN store s ON si.store_id = s.id
-        WHERE
-            to_tsvector('english',
-                COALESCE(m.generic_name, '') || ' ' ||
-                COALESCE(m.category, '') || ' ' ||
-                COALESCE(si.store_specific_name, '') || ' ' ||
-                COALESCE(si.brand, '') || ' ' ||
-                COALESCE(s.name, '')
-            )
-            @@ websearch_to_tsquery('english', :query)
-        """,
+    SELECT COUNT(DISTINCT m.id)
+    FROM master_product m
+    JOIN store_item si ON m.id = si.master_product_id -- CHANGED
+    JOIN store s ON si.store_id = s.id                -- CHANGED
+    WHERE
+        to_tsvector('english',
+            COALESCE(m.generic_name, '') || ' ' ||
+            COALESCE(m.category, '') || ' ' ||
+            COALESCE(si.store_specific_name, '') || ' ' ||
+            COALESCE(si.brand, '') || ' ' ||
+            COALESCE(s.name, '')
+        )
+        @@ websearch_to_tsquery('english', :query)
+    """,
             nativeQuery = true)
     Page<MasterProduct> searchByKeyword(@Param("query") String query, Pageable pageable);
 }

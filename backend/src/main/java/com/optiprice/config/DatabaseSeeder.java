@@ -21,7 +21,7 @@ public class DatabaseSeeder implements CommandLineRunner {
 
             new Thread(() -> {
                 orchestrator.scrapeAllStores("milk");
-                orchestrator.scrapeAllStores("bread");
+                // orchestrator.scrapeAllStores("bread");
                 System.out.println("Initial Database Seed Complete.");
             }).start();
 
