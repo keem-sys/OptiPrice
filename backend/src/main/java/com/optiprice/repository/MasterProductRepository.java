@@ -19,26 +19,26 @@ public interface MasterProductRepository extends JpaRepository<MasterProduct, Lo
     List<String> findAllTrackedProductNames();
 
     @Query(value = """
-    SELECT m.* 
+    SELECT m.*
     FROM master_product m
-    JOIN store_item si ON m.id = si.master_product_id  -- CHANGED FROM LEFT JOIN TO JOIN
-    JOIN store s ON si.store_id = s.id                 -- CHANGED FROM LEFT JOIN TO JOIN
-    WHERE 
-        to_tsvector('english', 
-            COALESCE(m.generic_name, '') || ' ' || 
-            COALESCE(m.category, '') || ' ' || 
-            COALESCE(si.store_specific_name, '') || ' ' || 
-            COALESCE(si.brand, '') || ' ' || 
+    JOIN store_item si ON m.id = si.master_product_id
+    JOIN store s ON si.store_id = s.id
+    WHERE
+        to_tsvector('english',
+            COALESCE(m.generic_name, '') || ' ' ||
+            COALESCE(m.category, '') || ' ' ||
+            COALESCE(si.store_specific_name, '') || ' ' ||
+            COALESCE(si.brand, '') || ' ' ||
             COALESCE(s.name, '')
-        ) 
+        )
         @@ websearch_to_tsquery('english', :query)
     GROUP BY m.id
     ORDER BY MAX(ts_rank(
-        to_tsvector('english', 
-            COALESCE(m.generic_name, '') || ' ' || 
-            COALESCE(si.brand, '') || ' ' || 
+        to_tsvector('english',
+            COALESCE(m.generic_name, '') || ' ' ||
+            COALESCE(si.brand, '') || ' ' ||
             COALESCE(s.name, '')
-        ), 
+        ),
         websearch_to_tsquery('english', :query)
     )) DESC
     """,

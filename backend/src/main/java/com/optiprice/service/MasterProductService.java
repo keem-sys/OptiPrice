@@ -6,6 +6,7 @@ import com.optiprice.repository.MasterProductRepository;
 import com.optiprice.repository.StoreItemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.document.Document;
+import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,7 +67,6 @@ public class MasterProductService {
                         itemRepository.save(item);
                     },
                     () -> {
-                        // doesn't exist in DB? Create new
                         createNewMasterProduct(item, fallbackCategory);
                     }
             );
@@ -74,5 +74,16 @@ public class MasterProductService {
             System.err.println("Failed to link matched ID, falling back to new.");
             createNewMasterProduct(item, fallbackCategory);
         }
+    }
+
+    @Transactional(readOnly = true)
+    public List<Document> findSimilarProducts(String itemLabel) {
+        return vectorStore.similaritySearch(
+                SearchRequest.builder()
+                        .query(itemLabel)
+                        .topK(3)
+                        .similarityThreshold(0.85)
+                        .build()
+        );
     }
 }

@@ -1,14 +1,11 @@
 package com.optiprice.listener;
 
 import com.optiprice.event.ProductScrapedEvent;
-import com.optiprice.model.StoreItem;
 import com.optiprice.repository.StoreItemRepository;
 import com.optiprice.service.MatchingService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
