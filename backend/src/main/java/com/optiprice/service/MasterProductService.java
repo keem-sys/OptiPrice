@@ -38,8 +38,10 @@ public class MasterProductService {
         masterProduct.setCategory(predictedCategory);
         MasterProduct savedMaster = masterProductRepository.save(masterProduct);
 
-        storeItem.setMasterProduct(savedMaster);
-        itemRepository.save(storeItem);
+        itemRepository.findById(storeItem.getId()).ifPresent(freshItem -> {
+            freshItem.setMasterProduct(savedMaster);
+            itemRepository.save(freshItem);
+        });
 
         Document vectorDoc = new Document(
                 fullName,
@@ -63,8 +65,10 @@ public class MasterProductService {
 
             masterProductRepository.findById(masterId).ifPresentOrElse(
                     master -> {
-                        item.setMasterProduct(master);
-                        itemRepository.save(item);
+                        itemRepository.findById(item.getId()).ifPresent(freshItem -> {
+                            freshItem.setMasterProduct(master);
+                            itemRepository.save(freshItem);
+                        });
                     },
                     () -> {
                         createNewMasterProduct(item, fallbackCategory);
@@ -82,7 +86,7 @@ public class MasterProductService {
                 SearchRequest.builder()
                         .query(itemLabel)
                         .topK(3)
-                        .similarityThreshold(0.85)
+                        .similarityThreshold(0.75)
                         .build()
         );
     }
