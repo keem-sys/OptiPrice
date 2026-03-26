@@ -18,31 +18,18 @@ import java.util.List;
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
 public class AdminController {
-
     private final DailyScraperJob dailyScraperJob;
-    private final StoreCategoryRepository storeCategoryRepository;
-    private final ScraperOrchestrator orchestrator;
-
+    private final CategoryScraperJob categoryScraperJob;
 
     @PostMapping("/trigger-daily-scrape")
     public ResponseEntity<String> triggerScrape() {
-        new Thread(dailyScraperJob::runDailyScrape).start();
+        dailyScraperJob.runDailyScrape();
         return ResponseEntity.ok("Daily scrape triggered! Check logs.");
     }
 
     @PostMapping("/trigger-category-crawl")
     public ResponseEntity<String> triggerCategoryCrawl(@RequestParam String category) {
-        new Thread(() -> {
-            List<StoreCategory> links = storeCategoryRepository.findByCategoryNameIgnoreCase(category);
-            for (StoreCategory link : links) {
-                orchestrator.scrapeCategoryFromDb(
-                        link.getCategory().getName(),
-                        link.getStore().getName(),
-                        link.getUrl()
-                );
-            }
-        }).start();
-
+        categoryScraperJob.crawlCategory(category);
         return ResponseEntity.ok("Started crawling category: " + category + ". Check logs!");
     }
 }
