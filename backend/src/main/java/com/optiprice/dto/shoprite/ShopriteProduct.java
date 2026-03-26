@@ -12,10 +12,11 @@ public record ShopriteProduct(
         String stock,
         @JsonProperty("product_image_url")
         String productImageUrl,
-        String productUrl
+        String productUrl,
+        String barcode
 ) {
-        public ShopriteProduct withUrl(String url) {
-                return new ShopriteProduct(id, name, price, brand, stock, productImageUrl, url);
+        public ShopriteProduct withUrl(String url, String foundBarcode) {
+                return new ShopriteProduct(id, name, price, brand, stock, productImageUrl, url, foundBarcode);
         }
 
         public String getDisplayBrand() {

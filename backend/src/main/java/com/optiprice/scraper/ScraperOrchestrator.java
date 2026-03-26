@@ -24,7 +24,6 @@ public class ScraperOrchestrator {
     private final StoreService storeService;
     private final StoreItemService storeItemService;
 
-    // Category is Unknown -> AI predict it
     public void scrapeAllStores(String searchTerm) {
         System.out.println("--- Orchestrating SEARCH for: " + searchTerm + " ---");
 
@@ -78,6 +77,7 @@ public class ScraperOrchestrator {
             try {
                 String cleanPrice = p.price().replace("R", "").replace(",", ".").trim();
                 BigDecimal price = new BigDecimal(cleanPrice);
+                String barcode = p.barcode();
 
                 storeItemService.saveOrUpdateItem(
                         store,
@@ -87,7 +87,7 @@ public class ScraperOrchestrator {
                         price,
                         p.productImageUrl(),
                         p.productUrl(),
-                        knownCategory
+                        knownCategory, barcode
                 );
             } catch (Exception e) { /* skip bad item */ }
         }
@@ -105,12 +105,22 @@ public class ScraperOrchestrator {
                         : BigDecimal.ZERO;
 
                 String img = findBestPnpImage(p.images());
+                String barcode = extractCleanBarcode(p.code());
+
+                if (barcode == null && img != null) {
+                    java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("-(\\d{12,14})-");
+                    java.util.regex.Matcher matcher = pattern.matcher(img);
+                    if (matcher.find()) {
+                        barcode = matcher.group(1);
+                    }
+                }
+
                 String brand = (p.name().split("\\s+").length > 0) ? p.name().split("\\s+")[0] : "";
                 String productUrl = "https://www.pnp.co.za/p/" + p.code();
 
                 storeItemService.saveOrUpdateItem(
                         store, p.code(), p.name(), brand, price, img, productUrl,
-                        knownCategory
+                        knownCategory, barcode
                 );
             } catch (Exception e) { /* skip */ }
         }
@@ -124,6 +134,10 @@ public class ScraperOrchestrator {
             try {
                 String name = (p.displayName() != null) ? p.displayName() : p.name();
                 String productUrl = "https://www.checkers.co.za/p/" + p.id();
+                String barcode = null;
+                if (p.barcodes() != null && p.barcodes().length > 0) {
+                    barcode = extractCleanBarcode(p.barcodes()[0]);
+                }
 
                 String brand = p.brand();
                 if (brand == null || brand.trim().isEmpty()) {
@@ -134,7 +148,7 @@ public class ScraperOrchestrator {
                         store, p.id(), name, brand,
                         BigDecimal.valueOf(p.getPriceValue()),
                         p.getImageUrl(), productUrl,
-                        knownCategory
+                        knownCategory, barcode
                 );
             } catch (Exception e) { /* skip */ }
         }
@@ -180,5 +194,12 @@ public class ScraperOrchestrator {
         }
 
         return images.getFirst().url();
+    }
+
+    private String extractCleanBarcode(String rawCode) {
+        if (rawCode == null) return null;
+        String numbersOnly = rawCode.replaceAll("[^0-9]", "");
+        String clean = numbersOnly.replaceFirst("^0+(?!$)", "");
+        return (clean.length() >= 10) ? clean : null;
     }
 }
