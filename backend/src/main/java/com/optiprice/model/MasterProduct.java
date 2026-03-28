@@ -17,7 +17,6 @@ public class MasterProduct {
     private String category;
 
     @BatchSize(size = 20)
-    @OneToMany(mappedBy = "masterProduct", fetch = FetchType.EAGER)
-    @JsonManagedReference
+    @OneToMany(mappedBy = "masterProduct")
     private List<StoreItem> storeItems;
 }

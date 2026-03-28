@@ -15,8 +15,11 @@ import java.util.Optional;
 public interface StoreItemRepository extends JpaRepository<StoreItem, Long> {
     Optional<StoreItem> findByExternalIdAndStore(String externalId, Store store);
     List<StoreItem> findByMasterProductIsNull();
+
     @Query("SELECT DISTINCT si.masterProduct.genericName " +
             "FROM StoreItem si " +
             "WHERE si.lastUpdated < :threshold")
     List<String> findStaleProductNames(@Param("threshold") OffsetDateTime threshold);
+
+    Optional<StoreItem> findFirstByBarcode(String barcode);
 }

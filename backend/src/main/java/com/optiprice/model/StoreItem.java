@@ -29,6 +29,9 @@ public class StoreItem {
     @Column(columnDefinition = "TEXT")
     private String productUrl;
 
+    @Column(name ="barcode", length = 50)
+    private String barcode;
+
     private OffsetDateTime lastUpdated;
 
     @ManyToOne

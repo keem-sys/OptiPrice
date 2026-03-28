@@ -5,6 +5,7 @@ import com.optiprice.repository.StoreCategoryRepository;
 import com.optiprice.scraper.ScraperOrchestrator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -37,8 +38,9 @@ public class CategoryScraperJob {
         crawlCategory("Pantry");
     }
 
-    private void crawlCategory(String categoryName) {
-        log.info("STARTING CATEGORY CRAWL for at {}", categoryName, LocalDateTime.now());
+    @Async
+    public void crawlCategory(String categoryName) {
+        log.info("STARTING CATEGORY CRAWL for {} at {}", categoryName, LocalDateTime.now());
 
         List<StoreCategory> storeCategories = storeCategoryRepository.findByCategoryNameIgnoreCase(categoryName);
 
@@ -55,12 +57,12 @@ public class CategoryScraperJob {
 
             try {
                 orchestrator.scrapeCategoryFromDb(categoryName, storeName, targetUrl);
-
+                Thread.sleep(5000);
             } catch (Exception e) {
                 log.error("❌ Failed to crawl {} on {}", categoryName, storeName, e);
             }
         }
 
-        log.info("CATEGORY CRAWL COMPLETED for", categoryName);
+        log.info("CATEGORY CRAWL COMPLETED for {}", categoryName);
     }
 }

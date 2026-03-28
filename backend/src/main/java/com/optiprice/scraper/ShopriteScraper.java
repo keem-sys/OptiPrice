@@ -10,6 +10,8 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class ShopriteScraper {
@@ -62,10 +64,19 @@ public class ShopriteScraper {
                 String relativeUrl = (linkElement != null) ? linkElement.getAttribute("href") : "";
                 String absoluteUrl = "https://www.shoprite.co.za" + relativeUrl;
 
+                String innerHtml = element.innerHTML();
+                String barcode = null;
+
+                Pattern pattern = Pattern.compile("\\b(60\\d{11})");
+                Matcher matcher = pattern.matcher(innerHtml);
+                if (matcher.find()) {
+                    barcode = matcher.group(1);
+                }
+
                 if (jsonAttribute != null && !jsonAttribute.isEmpty()) {
                     try {
                         ShopriteProduct product = objectMapper.readValue(jsonAttribute, ShopriteProduct.class);
-                        products.add(product.withUrl(absoluteUrl));
+                        products.add(product.withUrl(absoluteUrl, barcode));
                     } catch (Exception e) {
                         System.err.println("Failed to parse product JSON: " + e.getMessage());
                     }

@@ -4,6 +4,7 @@ import com.optiprice.repository.StoreItemRepository;
 import com.optiprice.scraper.ScraperOrchestrator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -28,6 +29,7 @@ public class DailyScraperJob {
     );
 
     @Scheduled(cron = "0 0 4 * * *")
+    @Async
     public void runDailyScrape() {
         log.info("STARTING DAILY DATA REFRESH at {}", LocalDateTime.now());
 

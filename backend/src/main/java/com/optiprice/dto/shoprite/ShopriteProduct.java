@@ -8,29 +8,16 @@ public record ShopriteProduct(
         String id,
         String name,
         String price,
+        @JsonProperty("brand")
         String brand,
         String stock,
         @JsonProperty("product_image_url")
         String productImageUrl,
-        String productUrl
+        String productUrl,
+        String barcode
 ) {
-        public ShopriteProduct withUrl(String url) {
-                return new ShopriteProduct(id, name, price, brand, stock, productImageUrl, url);
-        }
-
-        public String getDisplayBrand() {
-                if (brand != null && !brand.trim().isEmpty()) {
-                        return brand;
-                }
-
-                if (name != null && !name.isEmpty()) {
-                        String[] parts = name.trim().split("\\s+");
-                        if (parts.length > 0) {
-                                return parts[0];
-                        }
-                }
-
-                return "Unknown";
+        public ShopriteProduct withUrl(String url, String foundBarcode) {
+                return new ShopriteProduct(id, name, price, brand, stock, productImageUrl, url, foundBarcode);
         }
 
         public boolean isAvailable() {
