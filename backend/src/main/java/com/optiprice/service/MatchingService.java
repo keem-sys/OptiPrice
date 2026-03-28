@@ -2,14 +2,17 @@ package com.optiprice.service;
 
 import com.optiprice.dto.response.CategoryResponse;
 import com.optiprice.dto.response.MatchResponse;
+import com.optiprice.model.MasterProduct;
 import com.optiprice.model.StoreItem;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.document.Document;
+import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Service;
 
 import java.text.Normalizer;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.ReentrantLock;
@@ -22,6 +25,7 @@ public class MatchingService {
     private final MasterProductService masterProductService;
     private final Semaphore aiPermits = new Semaphore(3);
     private final ConcurrentHashMap<String, ReentrantLock> itemLocks = new ConcurrentHashMap<>();
+    private final VectorStore vectorStore;
 
     public void findOrCreateMasterProduct(StoreItem item) {
         findOrCreateMasterProduct(item, null);
@@ -55,7 +59,8 @@ public class MatchingService {
                 List<Document> similarProducts = masterProductService.findSimilarProducts(itemLabel);
 
                 if (similarProducts.isEmpty()) {
-                    masterProductService.createNewMasterProduct(item, category);
+                    MasterProduct newMaster = masterProductService.createNewMasterProduct(item, category);
+                    saveToVectorStore(newMaster);
                     return;
                 }
 
@@ -83,7 +88,7 @@ public class MatchingService {
                         .user(u -> u.text("""
                 SYSTEM: You are a high-precision Data Auditor for a grocery price aggregator.
                 
-                TASK: Compare the "NEW ITEM" to the list of "CANDIDATES" and determine if they are the exact 
+                TASK: Compare the "NEW ITEM" to the list of "CANDIDATES" and determine if they are the exact
                 same real-world product.
                 
                 NEW ITEM: "{name}" (Brand: {brand})
@@ -131,7 +136,8 @@ public class MatchingService {
                 if (response != null && response.match() && response.candidate_id() != null) {
                     masterProductService.linkToExistingMaster(item, response.candidate_id(), category);
                 } else {
-                    masterProductService.createNewMasterProduct(item, category);
+                    MasterProduct newMaster = masterProductService.createNewMasterProduct(item, category);
+                    saveToVectorStore(newMaster);
                 }
 
             } finally {
@@ -183,6 +189,16 @@ public class MatchingService {
             System.err.println("Category prediction failed for '" + productName + "': " + e.getMessage());
             return "General";
         }
+    }
+
+    private void saveToVectorStore(MasterProduct masterProduct) {
+        System.out.println("Generating AI Vectors for: " + masterProduct.getGenericName());
+        Document vectorDoc = new Document(
+                masterProduct.getGenericName(),
+                Map.of("master_id", masterProduct.getId())
+        );
+        vectorStore.add(List.of(vectorDoc));
+        System.out.println("Vectors saved.");
     }
 
     private String normalizeString(String input) {

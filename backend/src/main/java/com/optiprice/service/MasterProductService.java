@@ -22,10 +22,11 @@ public class MasterProductService {
     private final StoreItemRepository itemRepository;
     private final VectorStore vectorStore;
 
+
     @Transactional
-    public void createNewMasterProduct(StoreItem storeItem, String predictedCategory) {
+    public MasterProduct createNewMasterProduct(StoreItem storeItem, String predictedCategory) {
         String brand = storeItem.getBrand();
-        String specificName = storeItem.getStoreSpecificName();
+        String specificName = storeItem.getStoreSpecificName() != null ? storeItem.getStoreSpecificName() : "";
 
         String fullName = (specificName.toLowerCase().startsWith(brand.toLowerCase()))
                 ? specificName
@@ -43,11 +44,7 @@ public class MasterProductService {
             itemRepository.save(freshItem);
         });
 
-        Document vectorDoc = new Document(
-                fullName,
-                Map.of("master_id", savedMaster.getId())
-        );
-        vectorStore.add(List.of(vectorDoc));
+        return savedMaster;
     }
 
     @Transactional

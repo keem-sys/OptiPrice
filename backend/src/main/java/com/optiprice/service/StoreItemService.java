@@ -1,6 +1,5 @@
 package com.optiprice.service;
 
-import com.optiprice.event.ProductScrapedEvent;
 import com.optiprice.model.MasterProduct;
 import com.optiprice.model.PriceLog;
 import com.optiprice.model.Store;
