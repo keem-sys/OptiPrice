@@ -5,6 +5,7 @@ import com.optiprice.dto.pnp.PnpImage;
 import com.optiprice.dto.pnp.PnpProduct;
 import com.optiprice.dto.shoprite.ShopriteProduct;
 import com.optiprice.model.Store;
+import com.optiprice.service.BrandExtractor;
 import com.optiprice.service.StoreItemService;
 import com.optiprice.service.StoreService;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ public class ScraperOrchestrator {
 
     private final StoreService storeService;
     private final StoreItemService storeItemService;
+    private final BrandExtractor brandExtractor;
 
     public void scrapeAllStores(String searchTerm) {
         System.out.println("--- Orchestrating SEARCH for: " + searchTerm + " ---");
@@ -46,7 +48,6 @@ public class ScraperOrchestrator {
         } catch (Exception e) { System.err.println("Checkers Search Failed: " + e.getMessage()); }
     }
 
-    // Category is Known -> Skip AI
     public void scrapeCategoryFromDb(String categoryName, String storeName, String url) {
         System.out.println("--- Orchestrating CRAWL for: " + categoryName + " @ " + storeName + " ---");
 
@@ -77,17 +78,17 @@ public class ScraperOrchestrator {
             try {
                 String cleanPrice = p.price().replace("R", "").replace(",", ".").trim();
                 BigDecimal price = new BigDecimal(cleanPrice);
-                String barcode = p.barcode();
+                String brand = brandExtractor.extractBrand(p.name(), p.brand());
 
                 storeItemService.saveOrUpdateItem(
                         store,
                         p.id(),
                         p.name(),
-                        p.getDisplayBrand(),
+                        brand,
                         price,
                         p.productImageUrl(),
                         p.productUrl(),
-                        knownCategory, barcode
+                        knownCategory, p.barcode()
                 );
             } catch (Exception e) { /* skip bad item */ }
         }
@@ -95,7 +96,6 @@ public class ScraperOrchestrator {
 
     private void processPnpProducts(List<PnpProduct> products, Store store, String knownCategory) {
         if (products == null || products.isEmpty()) return;
-
         List<PnpProduct> safeList = products.stream().limit(40).toList();
 
         for (PnpProduct p : safeList) {
@@ -115,7 +115,9 @@ public class ScraperOrchestrator {
                     }
                 }
 
-                String brand = (p.name().split("\\s+").length > 0) ? p.name().split("\\s+")[0] : "";
+
+                String brand = brandExtractor.extractBrand(p.name(), p.brand());
+
                 String productUrl = "https://www.pnp.co.za/p/" + p.code();
 
                 storeItemService.saveOrUpdateItem(
@@ -139,10 +141,7 @@ public class ScraperOrchestrator {
                     barcode = extractCleanBarcode(p.barcodes()[0]);
                 }
 
-                String brand = p.brand();
-                if (brand == null || brand.trim().isEmpty()) {
-                    brand = (name.split("\\s+").length > 0) ? name.split("\\s+")[0] : "Unknown";
-                }
+                String brand = brandExtractor.extractBrand(p.name(), p.brand());
 
                 storeItemService.saveOrUpdateItem(
                         store, p.id(), name, brand,

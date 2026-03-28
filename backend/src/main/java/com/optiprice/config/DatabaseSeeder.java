@@ -12,9 +12,6 @@ import org.jspecify.annotations.NonNull;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
-import java.time.OffsetDateTime;
-
 @Component
 @RequiredArgsConstructor
 public class DatabaseSeeder implements CommandLineRunner {
@@ -33,7 +30,6 @@ public class DatabaseSeeder implements CommandLineRunner {
             new Thread(() -> {
                 orchestrator.scrapeAllStores("milk");
                 // orchestrator.scrapeAllStores("bread");
-                // orchestrator.scrapeAllStores("Nestlé Ideal Evaporated Milk 380ml");
                 System.out.println("Initial Database Seed Complete.");
             }).start();
 
