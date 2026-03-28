@@ -1,5 +1,6 @@
 package com.optiprice.service;
 
+import com.google.common.util.concurrent.Striped;
 import com.optiprice.dto.response.CategoryResponse;
 import com.optiprice.dto.response.MatchResponse;
 import com.optiprice.model.MasterProduct;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
@@ -24,13 +26,13 @@ public class MatchingService {
     private final ChatClient chatClient;
     private final MasterProductService masterProductService;
     private final Semaphore aiPermits = new Semaphore(3);
-    private final ConcurrentHashMap<String, ReentrantLock> itemLocks = new ConcurrentHashMap<>();
     private final VectorStore vectorStore;
+
+    private final Striped<Lock> itemLocks = Striped.lock(64);
 
     public void findOrCreateMasterProduct(StoreItem item) {
         findOrCreateMasterProduct(item, null);
     }
-
 
     public void findOrCreateMasterProduct(StoreItem item, String knownCategory) {
 
@@ -40,7 +42,7 @@ public class MatchingService {
         String brandStr = (item.getBrand() != null && !item.getBrand().isEmpty())
                 ? item.getBrand() : "unknown_brand";
         String lockKey = brandStr.trim().toLowerCase();
-        ReentrantLock lock = itemLocks.computeIfAbsent(lockKey, k -> new ReentrantLock());
+        Lock lock = itemLocks.get(lockKey);
 
         lock.lock();
         try {
@@ -85,15 +87,10 @@ public class MatchingService {
                         .collect(Collectors.joining("\n"));
 
                 MatchResponse response = chatClient.prompt()
-                        .user(u -> u.text("""
-                SYSTEM: You are a high-precision Data Auditor for a grocery price aggregator.
-                
-                TASK: Compare the "NEW ITEM" to the list of "CANDIDATES" and determine if they are the exact
+                        .system(s -> s.text("""
+                You are a high-precision Data Auditor for a grocery price aggregator.
+                Compare the "NEW ITEM" to the list of "CANDIDATES" and determine if they are the exact
                 same real-world product.
-                
-                NEW ITEM: "{name}" (Brand: {brand})
-                CANDIDATES:
-                {candidates}
                 
                 STRICT MATCHING RULES:
                 1. PHYSICAL OBJECT MUST MATCH: "Chocolate Slab" is NOT "Liquid Milk". "Coffee" is NOT "Tea".
@@ -119,7 +116,13 @@ public class MatchingService {
                 8. "reasoning": State if the sizes, brands, and core product match based on the rules.
                 9. "candidate_id": CRITICAL! Extract the exact numeric ID from the CANDIDATES list for the matching item (e.g., if candidate is "ID 55: Milk", return "55"). If no match, return null.
                 10. "match": true ONLY IF sizes and core products are identical. Otherwise false.
-                """)
+                """))
+                        .user(u -> u.text("""
+                                NEW ITEM: "{name}" (Brand: {brand})
+                                
+                                CANDIDATES:
+                                {candidates}
+                                """)
                                 .param("name", item.getStoreSpecificName())
                                 .param("brand", item.getBrand())
                                 .param("candidates", candidateList))
@@ -148,12 +151,9 @@ public class MatchingService {
             System.err.println("AI Task Interrupted: " + item.getId());
         } catch (Exception e) {
             System.err.println("AI Matching failed: " + e.getMessage());
-            masterProductService.createNewMasterProduct(item, "General"); // Fallback
+            masterProductService.createNewMasterProduct(item, "Pantry");
         } finally {
             lock.unlock();
-            if (!lock.hasQueuedThreads()) {
-                itemLocks.remove(lockKey);
-            }
         }
     }
 
@@ -161,10 +161,9 @@ public class MatchingService {
         try {
             CategoryResponse response = chatClient
                     .prompt()
-                    .user(u -> u.text("""
+                    .system("""
+                    You are a categorization engine for a grocery application.
                     Return ONLY a valid JSON object
-                    Classify the grocery product: "{product}"
-                    
                     Choose ONE category from this exact list:
                     - Dairy
                     - Bakery
@@ -177,8 +176,11 @@ public class MatchingService {
                     - Household Cleaning
                     - Sweets & Snacks
                     
-                    Return ONLY the JSON. If unclear, return "Pantry".
+                    Return ONLY the JSON. If unclear, return "General".
                     """)
+                    .user(u -> u.text("""
+                            Classify the following grocery product: "{product}"
+                            """)
                             .param("product", productName))
                     .call()
                     .entity(CategoryResponse.class);
