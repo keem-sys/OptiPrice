@@ -26,6 +26,7 @@ public class ProductService {
     private final MasterProductRepository masterProductRepository;
     private final PriceLogRepository priceLogRepository;
 
+    @Transactional(readOnly = true)
     public PagedResponse<MasterProductResponse> searchProducts(String query, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<MasterProduct> productPage = masterProductRepository.searchByKeyword(query, pageable);
@@ -47,8 +48,9 @@ public class ProductService {
         return priceLogRepository.findHistoryByMasterId(masterId);
     }
 
+    @Transactional(readOnly = true)
     public MasterProductResponse getProductById(Long id) {
-        return masterProductRepository.findById(id)
+        return masterProductRepository.findByIdWithStores(id)
                 .map(this::mapToMasterProductResponse)
                 .orElseThrow(() -> new RuntimeException("Product with ID " + id + " not found"));
     }

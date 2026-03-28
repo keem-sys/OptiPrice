@@ -70,7 +70,7 @@ public record CheckersProduct(
 
         public String getImageUrl() {
                 if (imageId != null && !imageId.isEmpty()) {
-                        return "https://catalog.sixty60.co.za/v2/files/" + imageId + "?width=256&height=256";
+                        return "https://catalog.sixty60.co.za/v2/files/" + imageId + "?width=512&height=512";
                 }
                 return null;
         }

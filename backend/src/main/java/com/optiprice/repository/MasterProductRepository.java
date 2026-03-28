@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface MasterProductRepository extends JpaRepository<MasterProduct, Long> {
@@ -17,6 +18,9 @@ public interface MasterProductRepository extends JpaRepository<MasterProduct, Lo
 
     @Query("SELECT DISTINCT m.genericName FROM MasterProduct m")
     List<String> findAllTrackedProductNames();
+
+    @Query("SELECT m FROM MasterProduct m LEFT JOIN FETCH m.storeItems si LEFT JOIN FETCH si.store WHERE m.id = :id")
+    Optional<MasterProduct> findByIdWithStores(@Param("id") Long id);
 
     @Query(value = """
     SELECT m.*
