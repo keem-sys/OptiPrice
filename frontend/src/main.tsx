@@ -8,6 +8,7 @@ import RootLayout from './components/layout/RootLayout';
 import Home from './pages/Home';
 import ProductDetails from './pages/ProductDetails';
 import ErrorPage from './pages/ErrorPage';
+import {DealsPage} from "@/pages/DealsPage.tsx";
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -34,6 +35,11 @@ const router = createBrowserRouter([
                 path: 'product/:id',
                 element: <ProductDetails />,
             },
+
+            {
+                path: '/deals',
+                element: <DealsPage />,
+            }
         ],
     },
 ]);

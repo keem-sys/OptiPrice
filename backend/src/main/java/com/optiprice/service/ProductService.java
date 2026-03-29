@@ -55,6 +55,23 @@ public class ProductService {
                 .orElseThrow(() -> new RuntimeException("Product with ID " + id + " not found"));
     }
 
+    @Transactional(readOnly = true)
+    public PagedResponse<MasterProductResponse> getArbitrageDeals(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        BigDecimal minGap = new BigDecimal(10);
+        Page<MasterProduct> dealsPage = masterProductRepository.findProductsWithPriceGap(minGap, pageable);
+        List<MasterProductResponse> content = dealsPage.getContent().stream()
+                .map(this::mapToMasterProductResponse)
+                .toList();
+
+        return new PagedResponse<>(
+                content,
+                dealsPage.getNumber(),
+                dealsPage.getTotalElements(),
+                dealsPage.getTotalPages()
+        );
+    }
+
 
     private MasterProductResponse mapToMasterProductResponse(MasterProduct master) {
         List<StoreItemResponse> itemResponses = master.getStoreItems().stream()

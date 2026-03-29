@@ -121,7 +121,7 @@ export function Navbar() {
                     {/* GitHub Link */}
                     <Button variant="ghost" size="icon" asChild className="text-slate-500 hover:text-slate-900">
                         <a
-                            href="https://github.com/keem-sys/"
+                            href="https://github.com/keem-sys/OptiPrice"
                             target="_blank"
                             rel="noreferrer"
                         >
