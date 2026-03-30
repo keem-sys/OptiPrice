@@ -3,9 +3,8 @@ package com.optiprice.dto.pnp;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record PnpPrice(
-        Double value,
-        Double oldPrice,
-        String currencyIso,
-        String formattedValue
+public record PnpPromotion (
+    String promotionTextMessage,
+    String promotionDisplayType,
+    Boolean valid
 ) {}

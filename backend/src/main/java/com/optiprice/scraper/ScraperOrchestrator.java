@@ -3,6 +3,7 @@ package com.optiprice.scraper;
 import com.optiprice.dto.checkers.CheckersProduct;
 import com.optiprice.dto.pnp.PnpImage;
 import com.optiprice.dto.pnp.PnpProduct;
+import com.optiprice.dto.pnp.PnpPromotion;
 import com.optiprice.dto.shoprite.ShopriteProduct;
 import com.optiprice.model.Store;
 import com.optiprice.service.BrandExtractor;
@@ -76,8 +77,23 @@ public class ScraperOrchestrator {
     private void processShopriteProducts(List<ShopriteProduct> products, Store store, String knownCategory) {
         for (ShopriteProduct p : products) {
             try {
-                String cleanPrice = p.price().replace("R", "").replace(",", ".").trim();
-                BigDecimal price = new BigDecimal(cleanPrice);
+                BigDecimal regularPrice = parseShopritePrice(p.price());
+                BigDecimal promoPrice = parseShopritePrice(p.unitSalePrice());
+
+                BigDecimal currentPrice;
+                BigDecimal oldPrice = null;
+                boolean isOnPromotion = false;
+                String promoText = null;
+
+                if (promoPrice != null && promoPrice.compareTo(BigDecimal.ZERO) > 0 && promoPrice.compareTo(regularPrice) < 0) {
+                    currentPrice = promoPrice;
+                    oldPrice = regularPrice;
+                    isOnPromotion = true;
+                    promoText = "Xtra Savings";
+                } else {
+                    currentPrice = regularPrice;
+                }
+
                 String brand = brandExtractor.extractBrand(p.name(), p.brand());
 
                 storeItemService.saveOrUpdateItem(
@@ -85,10 +101,13 @@ public class ScraperOrchestrator {
                         p.id(),
                         p.name(),
                         brand,
-                        price,
+                        currentPrice,
+                        oldPrice,
                         p.productImageUrl(),
                         p.productUrl(),
-                        knownCategory, p.barcode()
+                        knownCategory, p.barcode(),
+                        isOnPromotion,
+                        promoText
                 );
             } catch (Exception e) { /* skip bad item */ }
         }
@@ -100,9 +119,24 @@ public class ScraperOrchestrator {
 
         for (PnpProduct p : safeList) {
             try {
+                String name = p.name();
                 BigDecimal price = (p.price() != null && p.price().value() != null)
                         ? BigDecimal.valueOf(p.price().value())
                         : BigDecimal.ZERO;
+
+                boolean isOnPromotion = false;
+                String promoText = null;
+                BigDecimal oldPrice = null;
+
+                if (p.potentialPromotions() != null && !p.potentialPromotions().isEmpty()) {
+                    isOnPromotion = true;
+                    promoText = p.potentialPromotions().getFirst().promotionTextMessage();
+                }
+
+                if (p.price() != null && p.price().oldPrice() != null && p.price().oldPrice() > p.price().value()) {
+                    oldPrice = BigDecimal.valueOf(p.price().oldPrice());
+                    isOnPromotion = true;
+                }
 
                 String img = findBestPnpImage(p.images());
                 String barcode = extractCleanBarcode(p.code());
@@ -115,14 +149,19 @@ public class ScraperOrchestrator {
                     }
                 }
 
+                if (barcode != null && (name.contains(" x ") || name.toLowerCase().contains("pack"))) {
+                    barcode = null;
+                    System.out.println("Discarded suspicious image barcode for bulk item: " + name);
+                }
+
 
                 String brand = brandExtractor.extractBrand(p.name(), p.brand());
 
                 String productUrl = "https://www.pnp.co.za/p/" + p.code();
 
                 storeItemService.saveOrUpdateItem(
-                        store, p.code(), p.name(), brand, price, img, productUrl,
-                        knownCategory, barcode
+                        store, p.code(), p.name(), brand, price, oldPrice, img, productUrl,
+                        knownCategory, barcode, isOnPromotion, promoText
                 );
             } catch (Exception e) { /* skip */ }
         }
@@ -141,19 +180,38 @@ public class ScraperOrchestrator {
                     barcode = extractCleanBarcode(p.barcodes()[0]);
                 }
 
+                Boolean isOnPromotion = p.isOnPromotion();
+                BigDecimal oldPrice = null;
+
+                if (p.oldPrice() != null && p.priceFactor() != null && p.priceFactor() > 0) {
+                    oldPrice = BigDecimal.valueOf((double) p.oldPrice() / p.priceFactor());
+                }
+
+                String promoText = (isOnPromotion != null && isOnPromotion) ? "Xtra Savings" : null;
+
                 String brand = brandExtractor.extractBrand(p.name(), p.brand());
 
                 storeItemService.saveOrUpdateItem(
                         store, p.id(), name, brand,
-                        BigDecimal.valueOf(p.getPriceValue()),
+                        BigDecimal.valueOf(p.getPriceValue()), oldPrice,
                         p.getImageUrl(), productUrl,
-                        knownCategory, barcode
+                        knownCategory, barcode, isOnPromotion, promoText
                 );
             } catch (Exception e) { /* skip */ }
         }
     }
 
     // Store Helpers
+
+    private BigDecimal parseShopritePrice(String priceStr) {
+        if (priceStr == null || priceStr.isBlank()) return null;
+        try {
+            String clean = priceStr.replace("R", "").replace(",", ".").trim();
+            return new BigDecimal(clean);
+        } catch (Exception e) {
+            return null;
+        }
+    }
 
     private Store getShopriteStore() {
         return storeService.getOrCreateStore("Shoprite",

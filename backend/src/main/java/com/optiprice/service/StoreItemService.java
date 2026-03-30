@@ -32,8 +32,8 @@ public class StoreItemService {
     @Transactional
     @CacheEvict(value = "history", key = "#result.masterProduct.id", condition = "#result.masterProduct != null")
     public StoreItem saveOrUpdateItem(Store store, String externalId, String name, String brand,
-                                 BigDecimal price, String imageUrl, String productUrl, String knownCategory,
-                                      String barcode) {
+                                 BigDecimal price, BigDecimal oldPrice, String imageUrl, String productUrl, String knownCategory,
+                                      String barcode, Boolean isOnPromotion, String promotionText) {
 
         OffsetDateTime now = OffsetDateTime.now();
 
@@ -50,6 +50,10 @@ public class StoreItemService {
         item.setCurrentPrice(price);
         item.setLastUpdated(now);
         item.setBarcode(barcode);
+
+        item.setOldPrice(oldPrice);
+        item.setIsOnPromotion(isOnPromotion != null ? isOnPromotion : false);
+        item.setPromotionText(promotionText);
 
         if (imageUrl != null) item.setImageUrl(imageUrl);
         if (productUrl != null) item.setProductUrl(productUrl);
@@ -70,12 +74,24 @@ public class StoreItemService {
 
         if (item.getMasterProduct() == null) {
             String finalCleanName = cleanName;
-            masterProductRepository.findByGenericNameContainingIgnoreCase(cleanName)
+            masterProductRepository.findByGenericNameIgnoreCase(cleanName)
                     .stream()
                     .findFirst()
                     .ifPresent(existingMaster -> {
                         item.setMasterProduct(existingMaster);
                         System.out.println("EXACT NAME MATCH: Linked '" + finalCleanName + "' to existing Master.");
+
+                        if (item.getBarcode() == null || item.getBarcode().isEmpty()) {
+
+                            existingMaster.getStoreItems().stream()
+                                    .filter(sibling -> sibling.getBarcode() != null && !sibling.getBarcode().isEmpty())
+                                    .findFirst()
+                                    .ifPresent(siblingWithBarcode -> {
+                                        item.setBarcode(siblingWithBarcode.getBarcode());
+                                        System.out.println("BACKFILLED BARCODE: Copied EAN '" +
+                                                siblingWithBarcode.getBarcode() + "' to " + name);
+                                    });
+                        }
                     });
         }
 

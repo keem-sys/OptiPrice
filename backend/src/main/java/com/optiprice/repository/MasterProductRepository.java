@@ -13,7 +13,7 @@ import java.util.Optional;
 
 @Repository
 public interface MasterProductRepository extends JpaRepository<MasterProduct, Long> {
-    List<MasterProduct> findByGenericNameContainingIgnoreCase(String name);
+    List<MasterProduct> findByGenericNameIgnoreCase(String name);
     List<MasterProduct> findByCategoryIgnoreCase(String category);
 
     @Query("SELECT DISTINCT m.genericName FROM MasterProduct m")

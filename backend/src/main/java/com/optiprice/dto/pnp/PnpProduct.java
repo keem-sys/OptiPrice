@@ -12,7 +12,8 @@ public record PnpProduct(
         Boolean inStockIndicator,
         PnpPrice price,
         List<PnpImage> images,
+        List<PnpPromotion> potentialPromotions,
         String productUrl,
-        @JsonProperty("brand")
+        @JsonProperty("brandSellerId")
         String brand
 ) {}
