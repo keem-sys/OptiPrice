@@ -9,6 +9,10 @@ public record StoreItemResponse(
         String brand,
         String storeSpecificName,
         BigDecimal price,
+        BigDecimal oldPrice,
+        Boolean isOnPromotion,
+        String promotionText,
+        String barcode,
         String productUrl,
         String imageUrl,
         OffsetDateTime lastUpdated

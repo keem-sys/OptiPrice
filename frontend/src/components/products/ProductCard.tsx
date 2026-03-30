@@ -53,6 +53,12 @@ export function ProductCard({ product }: ProductCardProps) {
                 <Badge className="absolute top-3 left-3 bg-white/90 text-slate-700 hover:bg-white shadow-sm backdrop-blur-sm">
                     {product.category || "General"}
                 </Badge>
+
+                {product.storeItems.find(i => i.isOnPromotion) && (
+                    <Badge className="absolute top-3 right-3 bg-red-600 hover:bg-red-700 text-white shadow-md border-none px-3 py-1 font-bold">
+                        {product.storeItems.find(i => i.isOnPromotion)?.promotionText || "On Sale"}
+                    </Badge>
+                )}
             </div>
 
             {/* CONTENT SECTION */}

@@ -19,16 +19,24 @@ public class ProductController {
     @GetMapping("/deals")
     public ResponseEntity<PagedResponse<MasterProductResponse>> getDeals(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "12") int size
-    ) {
+            @RequestParam(defaultValue = "12") int size)
+    {
         return ResponseEntity.ok(productService.getArbitrageDeals(page, size));
     }
 
     @GetMapping("/deals/drops")
     public ResponseEntity<PagedResponse<MasterProductResponse>> getPriceDrops(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "12") int size) {
-
+            @RequestParam(defaultValue = "12") int size)
+    {
         return ResponseEntity.ok(productService.getPriceDropDeals(page, size));
+    }
+
+    @GetMapping("/deals/promotions")
+    public ResponseEntity<PagedResponse<MasterProductResponse>> getOfficialPromotions(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size)
+    {
+        return ResponseEntity.ok(productService.getOfficialPromotions(page, size));
     }
 }

@@ -64,6 +64,11 @@ export const getPriceDrops = async (page: number, size: number): Promise<PagedRe
     return response.data;
 };
 
+export const getPromotions = async (page: number, size: number): Promise<PagedResponse<MasterProduct>> => {
+    const response = await api.get<PagedResponse<MasterProduct>>('/products/deals/promotions', { params: { page, size } });
+    return response.data;
+};
+
 export interface PriceHistoryPoint {
     date: string;
     storeName: string;

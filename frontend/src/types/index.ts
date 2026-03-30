@@ -18,6 +18,10 @@ export interface StoreItem {
     brand: string;
     storeSpecificName: string;
     price: number;
+    oldPrice: number;
+    isOnPromotion: boolean;
+    promotionText: string;
+    barcode?: string;
     productUrl: string;
     imageUrl: string;
     lastUpdated: string;

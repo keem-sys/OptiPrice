@@ -23,7 +23,14 @@ public interface MasterProductRepository extends JpaRepository<MasterProduct, Lo
     Optional<MasterProduct> findByIdWithStores(@Param("id") Long id);
 
     /**
-     * Price Drop Query
+     * Official Promotion (DealType) Query
+     * Finds products where at least one store has flagged it as an official promotion/sale.
+     */
+    @Query("SELECT DISTINCT m FROM MasterProduct m JOIN m.storeItems si WHERE si.isOnPromotion = true")
+    Page<MasterProduct> findOfficialPromotions(Pageable pageable);
+
+    /**
+     * Price Drop (DealType) Query
      * Finds products where the current price is at least X% lower than its all-time high price.
      */
     @Query(value = """
@@ -51,7 +58,7 @@ public interface MasterProductRepository extends JpaRepository<MasterProduct, Lo
 
 
     /**
-     * Huge Gap Query
+     * Huge Gap (DealType) Query
      * Finds products sold in at least 2 stores where the price gap is larger than a minimum amount.
      * Sorts them so the biggest savings appear at the top of the page.
      */

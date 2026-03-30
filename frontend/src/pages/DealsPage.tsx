@@ -1,17 +1,17 @@
 import { useState } from "react";
 import { useDeals } from "@/hooks/useDeals";
 import { ProductCard } from "@/components/products/ProductCard";
-import { Flame, TrendingDown, ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
+import { Flame, TrendingDown, ArrowLeft, ArrowRight, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export function DealsPage() {
     const[page, setPage] = useState(0);
-    const [dealType, setDealType] = useState<"arbitrage" | "drops">("arbitrage");
+    const [dealType, setDealType] = useState<"arbitrage" | "drops" | "promotions">("arbitrage");
 
     const { data, isLoading, isFetching } = useDeals(dealType, page, 12);
 
-    const handleTabSwitch = (type: "arbitrage" | "drops") => {
+    const handleTabSwitch = (type: "arbitrage" | "drops" | "promotions") => {
         setDealType(type);
         setPage(0);
     };
@@ -22,14 +22,15 @@ export function DealsPage() {
             {/* HERO SECTION */}
             <div className={cn(
                 "mb-8 rounded-2xl p-8 text-white shadow-lg transition-colors duration-500",
-                dealType === "arbitrage" ? "bg-linear-to-r from-orange-500 to-red-600" : "bg-linear-to-r from-emerald-500 to-teal-600"
+                dealType === "arbitrage" ? "bg-linear-to-r from-orange-500 to-red-600" :
+                    dealType === "drops" ? "bg-linear-to-r from-emerald-500 to-teal-600" :
+                        "bg-linear-to-r from-violet-500 to-purple-600"
             )}>
-                <div className="flex items-center gap-3 mb-4">
-                    {dealType === "arbitrage" ? <Flame className="h-8 w-8 text-yellow-300" /> : <TrendingDown className="h-8 w-8 text-green-200" />}
-                    <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
-                        {dealType === "arbitrage" ? "Huge Store Gaps" : "Recent Price Drops"}
-                    </h1>
-                </div>
+                <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
+                    {dealType === "arbitrage" ? "Huge Store Gaps" :
+                        dealType === "drops" ? "Recent Price Drops" :
+                            "Official Store Promotions"}
+                </h1>
                 <p className="max-w-2xl text-lg opacity-90">
                     {dealType === "arbitrage"
                         ? "We found products with a price difference of at least R10.00 between stores today. Don't overpay!"
@@ -46,6 +47,15 @@ export function DealsPage() {
                 >
                     <Flame className="mr-2 h-4 w-4" /> Store Gaps
                 </Button>
+
+                <Button
+                    variant={dealType === "promotions" ? "default" : "outline"}
+                    onClick={() => handleTabSwitch("promotions")}
+                    className={dealType === "promotions" ? "bg-violet-600 hover:bg-violet-700" : ""}
+                >
+                    <Sparkles className="mr-2 h-4 w-4" /> Official Promos
+                </Button>
+
                 <Button
                     variant={dealType === "drops" ? "default" : "outline"}
                     onClick={() => handleTabSwitch("drops")}

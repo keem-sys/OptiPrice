@@ -60,6 +60,7 @@ public class ProductService {
         Pageable pageable = PageRequest.of(page, size);
         BigDecimal minGap = new BigDecimal(10);
         Page<MasterProduct> dealsPage = masterProductRepository.findProductsWithPriceGap(minGap, pageable);
+
         List<MasterProductResponse> content = dealsPage.getContent().stream()
                 .map(this::mapToMasterProductResponse)
                 .toList();
@@ -87,6 +88,23 @@ public class ProductService {
                 dropsPage.getNumber(),
                 dropsPage.getTotalElements(),
                 dropsPage.getTotalPages()
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public PagedResponse<MasterProductResponse> getOfficialPromotions(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<MasterProduct> promotionsPage = masterProductRepository.findOfficialPromotions(pageable);
+
+        List<MasterProductResponse> content = promotionsPage.getContent().stream()
+                .map(this::mapToMasterProductResponse)
+                .toList();
+
+        return new PagedResponse<>(
+                content,
+                promotionsPage.getNumber(),
+                promotionsPage.getTotalElements(),
+                promotionsPage.getTotalPages()
         );
     }
 
@@ -119,6 +137,10 @@ public class ProductService {
                 item.getBrand(),
                 item.getStoreSpecificName(),
                 item.getCurrentPrice(),
+                item.getOldPrice(),
+                item.getIsOnPromotion(),
+                item.getPromotionText(),
+                item.getBarcode(),
                 item.getProductUrl(),
                 item.getImageUrl(),
                 item.getLastUpdated()
