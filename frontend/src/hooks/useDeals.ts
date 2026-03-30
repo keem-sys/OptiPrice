@@ -1,10 +1,11 @@
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
-import { getDeals } from "@/services/api";
+import { getDeals, getPriceDrops } from "@/services/api";
 
-export const useDeals = (page: number = 0, size: number = 12) => {
+export const useDeals = (dealType: "arbitrage" | "drops",
+                         page: number = 0, size: number = 12) => {
     return useQuery({
-        queryKey: ['deals', page, size],
-        queryFn: () => getDeals(page, size),
+        queryKey: ['deals', dealType, page, size],
+        queryFn: () => dealType === "arbitrage" ? getDeals(page, size) : getPriceDrops(page, size),
         placeholderData: keepPreviousData,
         staleTime: 5 * 60 * 1000,
     });

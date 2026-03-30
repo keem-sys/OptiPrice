@@ -22,8 +22,38 @@ public interface MasterProductRepository extends JpaRepository<MasterProduct, Lo
     @Query("SELECT m FROM MasterProduct m LEFT JOIN FETCH m.storeItems si LEFT JOIN FETCH si.store WHERE m.id = :id")
     Optional<MasterProduct> findByIdWithStores(@Param("id") Long id);
 
-    /* Finds products sold in at least 2 stores where the price gap is larger than a minimum amount.
-     Sorts them so the biggest savings appear at the top of the page.
+    /**
+     * Price Drop Query
+     * Finds products where the current price is at least X% lower than its all-time high price.
+     */
+    @Query(value = """
+            SELECT DISTINCT m.*
+            FROM master_product m
+            JOIN store_item si ON m.id = si.master_product_id
+            WHERE si.current_price <= (
+                SELECT MAX(pl.price) * :multiplier
+                FROM price_log pl
+                WHERE pl.store_item_id = si.id
+            )
+            """,
+            countQuery = """
+            SELECT COUNT(DISTINCT m.id)
+            FROM master_product m
+            JOIN store_item si ON m.id = si.master_product_id
+            WHERE si.current_price <= (
+                SELECT MAX(pl.price) * :multiplier
+                FROM price_log pl
+                WHERE pl.store_item_id = si.id
+            )
+            """,
+            nativeQuery = true)
+    Page<MasterProduct> findProductsWithPriceDrop(@Param("multiplier") double multiplier, Pageable pageable);
+
+
+    /**
+     * Huge Gap Query
+     * Finds products sold in at least 2 stores where the price gap is larger than a minimum amount.
+     * Sorts them so the biggest savings appear at the top of the page.
      */
     @Query("""
         SELECT m FROM MasterProduct m

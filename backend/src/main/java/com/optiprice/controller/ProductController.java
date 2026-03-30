@@ -23,4 +23,12 @@ public class ProductController {
     ) {
         return ResponseEntity.ok(productService.getArbitrageDeals(page, size));
     }
+
+    @GetMapping("/deals/drops")
+    public ResponseEntity<PagedResponse<MasterProductResponse>> getPriceDrops(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size) {
+
+        return ResponseEntity.ok(productService.getPriceDropDeals(page, size));
+    }
 }

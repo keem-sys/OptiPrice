@@ -72,6 +72,24 @@ public class ProductService {
         );
     }
 
+    @Transactional(readOnly = true)
+    public PagedResponse<MasterProductResponse> getPriceDropDeals(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<MasterProduct> dropsPage = masterProductRepository.findProductsWithPriceDrop
+                (0.85, pageable);
+
+        List<MasterProductResponse> content = dropsPage.getContent().stream()
+                .map(this::mapToMasterProductResponse)
+                .toList();
+
+        return new PagedResponse<>(
+                content,
+                dropsPage.getNumber(),
+                dropsPage.getTotalElements(),
+                dropsPage.getTotalPages()
+        );
+    }
+
 
     private MasterProductResponse mapToMasterProductResponse(MasterProduct master) {
         List<StoreItemResponse> itemResponses = master.getStoreItems().stream()
