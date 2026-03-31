@@ -28,8 +28,8 @@ public class DatabaseSeeder implements CommandLineRunner {
             System.out.println("Database is empty! Seeding initial data...");
 
             new Thread(() -> {
-                orchestrator.scrapeAllStores("milk");
-                // orchestrator.scrapeAllStores("bread");
+                // orchestrator.scrapeAllStores("milk");
+                orchestrator.scrapeAllStores("bread");
                 System.out.println("Initial Database Seed Complete.");
             }).start();
 

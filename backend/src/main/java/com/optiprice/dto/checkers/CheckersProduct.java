@@ -17,9 +17,6 @@ public record CheckersProduct(
         @JsonProperty("displayName")
         String displayName,
 
-        @JsonProperty("description")
-        String description,
-
         @JsonProperty("articleNumber")
         String articleNumber,
 
@@ -35,8 +32,7 @@ public record CheckersProduct(
         @JsonProperty("currency")
         String currency,
 
-        @JsonProperty("discount")
-        Integer discount,
+        @JsonProperty("price") Double rawPrice,
 
         @JsonProperty("oldPrice")
         Integer oldPrice,
@@ -44,25 +40,20 @@ public record CheckersProduct(
         @JsonProperty("isOnPromotion")
         Boolean isOnPromotion,
 
-        // Stock fields
         @JsonProperty("isStockAvailable")
         Boolean isStockAvailable,
 
-        @JsonProperty("stockOnHand")
-        Integer stockOnHand,
-
-        // Other useful fields
         @JsonProperty("imageId")
         String imageId,
 
         @JsonProperty("unitOfMeasure")
         String unitOfMeasure,
 
-        @JsonProperty("packQuantity")
-        Integer packQuantity,
-
         @JsonProperty("barcodes")
-        String[] barcodes
+        String[] barcodes,
+
+        @JsonProperty("bonusBuy")
+        CheckersBonusBuy bonusBuy
 ) {
         public CheckersPrice price() {
                 return new CheckersPrice(priceWithoutDecimal, priceFactor, currencySymbol);
@@ -79,6 +70,15 @@ public record CheckersProduct(
                 if (priceWithoutDecimal != null && priceFactor != null && priceFactor > 0) {
                         return (double) priceWithoutDecimal / priceFactor;
                 }
+
+                if (rawPrice != null && rawPrice > 0) {
+                        return rawPrice;
+                }
+
+                if (oldPrice != null && priceFactor != null && priceFactor > 0) {
+                        return (double) oldPrice / priceFactor;
+                }
+
                 return 0.0;
         }
 }

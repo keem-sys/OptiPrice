@@ -40,6 +40,10 @@ public class StoreItem {
 
     private OffsetDateTime lastUpdated;
 
+    @Column(name = "article_sku", length = 50)
+    private String articleSku;
+
+
     @ManyToOne
     @JoinColumn(name = "store_id")
     private Store store;

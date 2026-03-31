@@ -9,13 +9,11 @@ import com.optiprice.repository.PriceLogRepository;
 import com.optiprice.repository.StoreItemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @RequiredArgsConstructor
@@ -23,17 +21,13 @@ public class StoreItemService {
 
     private final StoreItemRepository itemRepo;
     private final PriceLogRepository priceLogRepo;
-    private final ApplicationEventPublisher eventPublisher;
-    private final MasterProductService masterProductService;
-    private final MatchingService matchingService;
-    private static final ConcurrentHashMap<String, Long> barcodeRegistry = new ConcurrentHashMap<>();
     private final MasterProductRepository masterProductRepository;
 
     @Transactional
     @CacheEvict(value = "history", key = "#result.masterProduct.id", condition = "#result.masterProduct != null")
     public StoreItem saveOrUpdateItem(Store store, String externalId, String name, String brand,
                                  BigDecimal price, BigDecimal oldPrice, String imageUrl, String productUrl, String knownCategory,
-                                      String barcode, Boolean isOnPromotion, String promotionText) {
+                                      String barcode, Boolean isOnPromotion, String promotionText, String articleSku) {
 
         OffsetDateTime now = OffsetDateTime.now();
 
@@ -54,6 +48,7 @@ public class StoreItemService {
         item.setOldPrice(oldPrice);
         item.setIsOnPromotion(isOnPromotion != null ? isOnPromotion : false);
         item.setPromotionText(promotionText);
+        item.setArticleSku(articleSku);
 
         if (imageUrl != null) item.setImageUrl(imageUrl);
         if (productUrl != null) item.setProductUrl(productUrl);
@@ -68,6 +63,23 @@ public class StoreItemService {
             });
         }
 
+        if (item.getMasterProduct() == null && articleSku != null && !articleSku.isEmpty()) {
+            itemRepo.findFirstByArticleSkuAndMasterProductIsNotNull(articleSku).ifPresent(existingSibling -> {
+                MasterProduct master = existingSibling.getMasterProduct();
+                item.setMasterProduct(master);
+                System.out.println("SKU MATCH: " + name);
+
+                if (item.getBarcode() == null || item.getBarcode().isEmpty()) {
+                    master.getStoreItems().stream()
+                            .filter(si -> si.getBarcode() != null && !si.getBarcode().isEmpty())
+                            .findFirst()
+                            .ifPresent(barcodeSibling -> {
+                                item.setBarcode(barcodeSibling.getBarcode());
+                                System.out.println("DATA ENRICHMENT: Found Barcode from " + barcodeSibling.getStore().getName());
+                            });
+                }
+            });
+        }
 
         String cleanName = name.replaceAll("(?i)\\b(Fresh|Instant|Eco|Premium)\\b", "").trim();
         cleanName = cleanName.replaceAll("\\s+", " ");
@@ -88,7 +100,7 @@ public class StoreItemService {
                                     .findFirst()
                                     .ifPresent(siblingWithBarcode -> {
                                         item.setBarcode(siblingWithBarcode.getBarcode());
-                                        System.out.println("BACKFILLED BARCODE: Copied EAN '" +
+                                        System.out.println("BACKFILLED BARCODE: '" +
                                                 siblingWithBarcode.getBarcode() + "' to " + name);
                                     });
                         }

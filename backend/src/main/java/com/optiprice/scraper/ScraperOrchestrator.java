@@ -31,9 +31,15 @@ public class ScraperOrchestrator {
         System.out.println("--- Orchestrating SEARCH for: " + searchTerm + " ---");
 
         try {
+            List<CheckersProduct> products = checkersScraper.scrapeProducts(searchTerm);
+            Store store = getCheckersStore();
+            processCheckersProducts(products, store, null);
+        } catch (Exception e) { System.err.println("Checkers Search Failed: " + e.getMessage()); }
+
+        try {
             List<ShopriteProduct> products = shopriteScraper.scrapeProducts(searchTerm);
             Store store = getShopriteStore();
-            processShopriteProducts(products, store, null); // null category
+            processShopriteProducts(products, store, null);
         } catch (Exception e) { System.err.println("Shoprite Search Failed: " + e.getMessage()); }
 
         try {
@@ -41,12 +47,6 @@ public class ScraperOrchestrator {
             Store store = getPnpStore();
             processPnpProducts(products, store, null);
         } catch (Exception e) { System.err.println("PnP Search Failed: " + e.getMessage()); }
-
-        try {
-            List<CheckersProduct> products = checkersScraper.scrapeProducts(searchTerm);
-            Store store = getCheckersStore();
-            processCheckersProducts(products, store, null);
-        } catch (Exception e) { System.err.println("Checkers Search Failed: " + e.getMessage()); }
     }
 
     public void scrapeCategoryFromDb(String categoryName, String storeName, String url) {
@@ -95,6 +95,7 @@ public class ScraperOrchestrator {
                 }
 
                 String brand = brandExtractor.extractBrand(p.name(), p.brand());
+                String articleSku = p.id();
 
                 storeItemService.saveOrUpdateItem(
                         store,
@@ -107,7 +108,8 @@ public class ScraperOrchestrator {
                         p.productUrl(),
                         knownCategory, p.barcode(),
                         isOnPromotion,
-                        promoText
+                        promoText,
+                        articleSku
                 );
             } catch (Exception e) { /* skip bad item */ }
         }
@@ -161,7 +163,7 @@ public class ScraperOrchestrator {
 
                 storeItemService.saveOrUpdateItem(
                         store, p.code(), p.name(), brand, price, oldPrice, img, productUrl,
-                        knownCategory, barcode, isOnPromotion, promoText
+                        knownCategory, barcode, isOnPromotion, promoText, null
                 );
             } catch (Exception e) { /* skip */ }
         }
@@ -173,6 +175,32 @@ public class ScraperOrchestrator {
 
         for (CheckersProduct p : safeList) {
             try {
+                double basePrice = p.getPriceValue();
+                BigDecimal currentPrice = BigDecimal.valueOf(basePrice);
+                BigDecimal oldPrice = null;
+                boolean isOnPromotion = false;
+                String promoText = null;
+
+                if (p.bonusBuy() != null) {
+                    isOnPromotion = true;
+                    promoText = p.bonusBuy().name();
+
+                    Double dealPrice = p.bonusBuy().discountValue();
+
+                    if (dealPrice != null && dealPrice > 0) {
+                        currentPrice = BigDecimal.valueOf(dealPrice);
+                        oldPrice = BigDecimal.valueOf(basePrice);
+                    }
+                }
+
+                else if (p.isOnPromotion() != null && p.isOnPromotion()) {
+                    isOnPromotion = true;
+                    promoText = "Special Offer";
+                    if (p.oldPrice() != null && p.priceFactor() != null) {
+                        oldPrice = BigDecimal.valueOf((double) p.oldPrice() / p.priceFactor());
+                    }
+                }
+
                 String name = (p.displayName() != null) ? p.displayName() : p.name();
                 String productUrl = "https://www.checkers.co.za/p/" + p.id();
                 String barcode = null;
@@ -180,22 +208,14 @@ public class ScraperOrchestrator {
                     barcode = extractCleanBarcode(p.barcodes()[0]);
                 }
 
-                Boolean isOnPromotion = p.isOnPromotion();
-                BigDecimal oldPrice = null;
-
-                if (p.oldPrice() != null && p.priceFactor() != null && p.priceFactor() > 0) {
-                    oldPrice = BigDecimal.valueOf((double) p.oldPrice() / p.priceFactor());
-                }
-
-                String promoText = (isOnPromotion != null && isOnPromotion) ? "Xtra Savings" : null;
-
                 String brand = brandExtractor.extractBrand(p.name(), p.brand());
+                String articleSku = p.articleNumber() + p.unitOfMeasure();
 
                 storeItemService.saveOrUpdateItem(
                         store, p.id(), name, brand,
-                        BigDecimal.valueOf(p.getPriceValue()), oldPrice,
+                        currentPrice, oldPrice,
                         p.getImageUrl(), productUrl,
-                        knownCategory, barcode, isOnPromotion, promoText
+                        knownCategory, barcode, isOnPromotion, promoText, articleSku
                 );
             } catch (Exception e) { /* skip */ }
         }

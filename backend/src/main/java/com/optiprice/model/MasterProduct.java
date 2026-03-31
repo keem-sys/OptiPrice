@@ -15,7 +15,6 @@ public class MasterProduct {
     private Long id;
     private String genericName;
     private String category;
-
     @BatchSize(size = 20)
     @OneToMany(mappedBy = "masterProduct")
     private List<StoreItem> storeItems;
