@@ -108,6 +108,16 @@ public class ProductService {
         );
     }
 
+    @Transactional(readOnly = true)
+    public List<BasketTrendProjection> getBasketTrends() {
+        return priceLogRepository.getDailyBasketTrend();
+    }
+
+    @Transactional(readOnly = true)
+    public List<String> getBasketItemNames() {
+        return masterProductRepository.findProductsInTrendBasket();
+    }
+
 
     private MasterProductResponse mapToMasterProductResponse(MasterProduct master) {
         List<StoreItemResponse> itemResponses = master.getStoreItems().stream()

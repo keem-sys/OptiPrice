@@ -80,4 +80,20 @@ export const getPriceHistory = async (id: string): Promise<PriceHistoryPoint[]> 
     return response.data;
 };
 
+export interface BasketTrendPoint {
+    logDate: string;
+    storeName: string;
+    basketPrice: number;
+}
+
+export const getBasketTrends = async (): Promise<BasketTrendPoint[]> => {
+    const response = await api.get<BasketTrendPoint[]>('/products/trends/basket');
+    return response.data;
+};
+
+export const getBasketItems = async (): Promise<string[]> => {
+    const response = await api.get<string[]>('/products/trends/basket-items');
+    return response.data;
+};
+
 export default api;

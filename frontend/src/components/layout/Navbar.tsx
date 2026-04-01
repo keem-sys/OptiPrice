@@ -20,7 +20,7 @@ export function Navbar() {
     const navLinks = [
         { href: "/", label: "Home" },
         { href: "/deals", label: "Daily Deals" },
-        { href: "/history", label: "Price Trends" },
+        { href: "/trends", label: "Price Trends" },
     ];
 
     const isActive = (path: string) => location.pathname === path;
