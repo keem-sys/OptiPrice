@@ -84,6 +84,8 @@ public class StoreItemService {
         String cleanName = name.replaceAll("(?i)\\b(Fresh|Instant|Eco|Premium)\\b", "").trim();
         cleanName = cleanName.replaceAll("\\s+", " ");
 
+        String fingerprint = generateFingerprint(cleanName);
+
         if (item.getMasterProduct() == null) {
             String finalCleanName = cleanName;
             masterProductRepository.findByGenericNameIgnoreCase(cleanName)
@@ -108,10 +110,20 @@ public class StoreItemService {
         }
 
         if (item.getMasterProduct() == null) {
+            String finalCleanName1 = cleanName;
+            masterProductRepository.findFirstByFingerprint(fingerprint)
+                    .ifPresent(existingMaster -> {
+                        item.setMasterProduct(existingMaster);
+                        System.out.println(" FINGERPRINT MATCH: Linked swapped words for '" + finalCleanName1 + "'");
+                    });
+        }
+
+        if (item.getMasterProduct() == null) {
             MasterProduct newMaster = new MasterProduct();
 
             newMaster.setGenericName(cleanName);
             newMaster.setCategory(knownCategory != null ? knownCategory : "General");
+            newMaster.setFingerprint(fingerprint);
 
             MasterProduct savedMaster = masterProductRepository.save(newMaster);
             item.setMasterProduct(savedMaster);
@@ -144,5 +156,13 @@ public class StoreItemService {
 
         priceLogRepo.save(log);
         return savedItem;
+    }
+
+    private String generateFingerprint(String name) {
+        if (name == null) return "";
+        String clean = name.toLowerCase().replaceAll("[^a-z0-9\\s]", "");
+        String[] words = clean.split("\\s+");
+        java.util.Arrays.sort(words);
+        return String.join(" ", words).trim();
     }
 }

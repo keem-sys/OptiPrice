@@ -22,6 +22,9 @@ public interface MasterProductRepository extends JpaRepository<MasterProduct, Lo
     @Query("SELECT m FROM MasterProduct m LEFT JOIN FETCH m.storeItems si LEFT JOIN FETCH si.store WHERE m.id = :id")
     Optional<MasterProduct> findByIdWithStores(@Param("id") Long id);
 
+    // Find a master product using the sorted word fingerprint
+    Optional<MasterProduct> findFirstByFingerprint(String fingerprint);
+
     /**
      * Official Promotion (DealType) Query
      * Finds products where at least one store has flagged it as an official promotion/sale.
