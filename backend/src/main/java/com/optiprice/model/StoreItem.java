@@ -19,6 +19,9 @@ public class StoreItem {
     @Column(precision = 10, scale = 2)
     private BigDecimal currentPrice;
 
+    @Column(precision = 10, scale = 2)
+    private BigDecimal oldPrice;
+
     private String storeSpecificName;
     private String brand;
     private String externalId;
@@ -32,7 +35,14 @@ public class StoreItem {
     @Column(name ="barcode", length = 50)
     private String barcode;
 
+    private Boolean isOnPromotion;
+    private String promotionText;
+
     private OffsetDateTime lastUpdated;
+
+    @Column(name = "article_sku", length = 50)
+    private String articleSku;
+
 
     @ManyToOne
     @JoinColumn(name = "store_id")

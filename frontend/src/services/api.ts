@@ -10,44 +10,63 @@ const api = axios.create({
     },
 });
 
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        const backendMessage = error.response?.data?.message || error.message;
+        
+        console.error("Global API Error:", {
+            url: error.config?.url,
+            status: error.response?.status,
+            message: backendMessage,
+        });
+        return Promise.reject(error);
+    }
+);
+
 export const searchProducts =
     async (query: string, page = 0): Promise<PagedResponse<MasterProduct>> => {
-        try {
-            const response =
-                await api.get<PagedResponse<MasterProduct>>(`/compare`, {
-                params: {
-                    item: query,
-                    page: page,
-                    size: 12
-                }
-            });
-            return response.data;
-    } catch (error) {
-        console.error("API error during search: ", error);
-        throw error;
-    }
+        const response =
+            await api.get<PagedResponse<MasterProduct>>(`/compare`, {
+            params: {
+                item: query,
+                page: page,
+                size: 12
+            }
+        });
+        return response.data;
 }
 
 export const triggerScrape = async (query: string): Promise<string> => {
-    try {
-        const response = await api.post(`/scrape`, null, {
-            params: { item: query }
-        });
-        return response.data;
-    } catch (error) {
-        console.error("API Error triggering scrape:", error);
-        throw error;
-    }
+    const response = await api.post(`/scrape`, null, {
+        params: { item: query }
+    });
+    return response.data;
 }
 
 export const getProductById = async (id: string): Promise<MasterProduct> => {
-    try {
         const response = await api.get<MasterProduct>(`/product/${id}`);
         return response.data;
-    } catch (error) {
-        console.error("API Error fetching details:", error);
-        throw error;
-    }
+};
+
+
+export const getDeals = async (page: number, size: number): Promise<PagedResponse<MasterProduct>> => {
+    const response = await api.get<PagedResponse<MasterProduct>>('/products/deals', {
+        params: { page, size }
+    });
+    return response.data;
+};
+
+export const getPriceDrops = async (page: number, size: number): Promise<PagedResponse<MasterProduct>> => {
+    const response = await api.get<PagedResponse<MasterProduct>>('/products/deals/drops', {
+        params: { page, size }
+    });
+    return response.data;
+};
+
+export const getPromotions = async (page: number, size: number): Promise<PagedResponse<MasterProduct>> => {
+    const response = await api.get<PagedResponse<MasterProduct>>('/products/deals/promotions', { params: { page, size } });
+    return response.data;
 };
 
 export interface PriceHistoryPoint {
@@ -58,6 +77,22 @@ export interface PriceHistoryPoint {
 
 export const getPriceHistory = async (id: string): Promise<PriceHistoryPoint[]> => {
     const response = await api.get<PriceHistoryPoint[]>(`/product/${id}/history`);
+    return response.data;
+};
+
+export interface BasketTrendPoint {
+    logDate: string;
+    storeName: string;
+    basketPrice: number;
+}
+
+export const getBasketTrends = async (): Promise<BasketTrendPoint[]> => {
+    const response = await api.get<BasketTrendPoint[]>('/products/trends/basket');
+    return response.data;
+};
+
+export const getBasketItems = async (): Promise<string[]> => {
+    const response = await api.get<string[]>('/products/trends/basket-items');
     return response.data;
 };
 

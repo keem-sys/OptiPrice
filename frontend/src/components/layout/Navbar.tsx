@@ -1,8 +1,9 @@
-import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { ShoppingBasket, Menu, Heart, Search } from "lucide-react";
+import {useEffect, useRef, useState} from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { ShoppingBasket, Menu, Heart, Search, X } from "lucide-react";
 import { SiGithub } from "react-icons/si";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
     Sheet,
     SheetContent,
@@ -15,19 +16,57 @@ import { cn } from "@/lib/utils";
 
 export function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const[searchQuery, setSearchQuery] = useState("");
+
     const location = useLocation();
+    const navigate = useNavigate();
+
+    const searchContainerRef = useRef<HTMLDivElement>(null);
 
     const navLinks = [
         { href: "/", label: "Home" },
         { href: "/deals", label: "Daily Deals" },
-        { href: "/history", label: "Price Trends" },
+        { href: "/trends", label: "Price Trends" },
     ];
 
     const isActive = (path: string) => location.pathname === path;
+    const isHomePage = location.pathname === "/";
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape" && isSearchOpen) {
+                setIsSearchOpen(false);
+            }
+        };
+
+        const handleClickOutside = (e: MouseEvent) => {
+            if (isSearchOpen && searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
+                setIsSearchOpen(false);
+            }
+        };
+
+        document.addEventListener("keydown", handleKeyDown);
+        document.addEventListener("mousedown", handleClickOutside);
+
+        return () => {
+            document.removeEventListener("keydown", handleKeyDown);
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [isSearchOpen]);
+
+    const handleGlobalSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (searchQuery.trim()) {
+            navigate(`/?q=${encodeURIComponent(searchQuery.trim())}`);
+            setIsSearchOpen(false);
+            setSearchQuery("");
+        }
+    };
 
     return (
-        <header className="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md">
-            <div className="container mx-auto flex h-16 items-center justify-between px-4">
+        <header ref={searchContainerRef} className="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/95 backdrop-blur-md">
+            <div className="container mx-auto flex h-16 items-center justify-between px-4 relative">
 
                 {/* LEFT SIDE: MOBILE MENU & LOGO */}
                 <div className="flex items-center gap-2">
@@ -106,11 +145,19 @@ export function Navbar() {
                 {/* RIGHT SIDE: ACTIONS */}
                 <div className="flex items-center gap-1 sm:gap-2">
 
-                    {/* Search Icon */}
-                    <Button variant="ghost" size="icon" className="text-slate-500 hover:text-indigo-600">
-                        <Search size={20} />
-                        <span className="sr-only">Search products</span>
-                    </Button>
+                    {/* Global Search Toggle Icon */}
+                    {!isHomePage && (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setIsSearchOpen(!isSearchOpen)}
+                            className={cn("text-slate-500 hover:text-indigo-600", isSearchOpen && "bg-slate-100 text-indigo-600")}
+                        >
+                            {isSearchOpen ? <X size={20} /> : <Search size={20} />}
+                            <span className="sr-only">Toggle Global Search</span>
+                        </Button>
+                    )}
+
 
                     {/* Watchlist */}
                     <Button variant="ghost" size="icon" className="text-slate-500 hover:text-red-500 hover:bg-red-50">
@@ -121,7 +168,7 @@ export function Navbar() {
                     {/* GitHub Link */}
                     <Button variant="ghost" size="icon" asChild className="text-slate-500 hover:text-slate-900">
                         <a
-                            href="https://github.com/keem-sys/"
+                            href="https://github.com/keem-sys/OptiPrice"
                             target="_blank"
                             rel="noreferrer"
                         >
@@ -129,9 +176,34 @@ export function Navbar() {
                             <span className="sr-only">GitHub</span>
                         </a>
                     </Button>
-
                 </div>
             </div>
+
+            {/* GLOBAL SEARCH DROPDOWN */}
+            {isSearchOpen && !isHomePage && (
+                <div className="absolute top-full left-0 w-full border-b border-slate-200 bg-white shadow-xl animate-in slide-in-from-top-2 p-4">
+                    <div className="container mx-auto max-w-3xl">
+                        <form onSubmit={handleGlobalSearch} className="relative flex items-center">
+                            <Search className="absolute left-4 h-5 w-5 text-slate-400" />
+                            <Input
+                                type="text"
+                                autoFocus
+                                placeholder="Search for groceries..."
+                                className="h-12 w-full rounded-full border-slate-200 bg-slate-50 pl-12 pr-24 text-lg focus-visible:ring-indigo-500"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                            <Button
+                                size="sm"
+                                type="submit"
+                                className="absolute right-2 rounded-full bg-indigo-600 hover:bg-indigo-700"
+                            >
+                                Search
+                            </Button>
+                        </form>
+                    </div>
+                </div>
+            )}
         </header>
     );
 }

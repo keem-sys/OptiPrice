@@ -76,7 +76,7 @@ public class ShopriteScraper {
                 if (jsonAttribute != null && !jsonAttribute.isEmpty()) {
                     try {
                         ShopriteProduct product = objectMapper.readValue(jsonAttribute, ShopriteProduct.class);
-                        products.add(product.withUrl(absoluteUrl, barcode));
+                        products.add(product.withUrlAndBarcode(absoluteUrl, barcode));
                     } catch (Exception e) {
                         System.err.println("Failed to parse product JSON: " + e.getMessage());
                     }

@@ -22,4 +22,6 @@ public interface StoreItemRepository extends JpaRepository<StoreItem, Long> {
     List<String> findStaleProductNames(@Param("threshold") OffsetDateTime threshold);
 
     Optional<StoreItem> findFirstByBarcode(String barcode);
+
+    Optional<StoreItem> findFirstByArticleSkuAndMasterProductIsNotNull(String articleSku);
 }

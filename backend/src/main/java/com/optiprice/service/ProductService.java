@@ -55,6 +55,77 @@ public class ProductService {
                 .orElseThrow(() -> new RuntimeException("Product with ID " + id + " not found"));
     }
 
+    @Transactional(readOnly = true)
+    public PagedResponse<MasterProductResponse> getArbitrageDeals(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        BigDecimal minGap = new BigDecimal(10);
+        Page<MasterProduct> dealsPage = masterProductRepository.findProductsWithPriceGap(minGap, pageable);
+
+        List<MasterProductResponse> content = dealsPage.getContent().stream()
+                .map(this::mapToMasterProductResponse)
+                .toList();
+
+        return new PagedResponse<>(
+                content,
+                dealsPage.getNumber(),
+                dealsPage.getTotalElements(),
+                dealsPage.getTotalPages()
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public PagedResponse<MasterProductResponse> getPriceDropDeals(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<MasterProduct> dropsPage = masterProductRepository.findProductsWithPriceDrop
+                (0.85, pageable);
+
+        List<MasterProductResponse> content = dropsPage.getContent().stream()
+                .map(this::mapToMasterProductResponse)
+                .toList();
+
+        return new PagedResponse<>(
+                content,
+                dropsPage.getNumber(),
+                dropsPage.getTotalElements(),
+                dropsPage.getTotalPages()
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public PagedResponse<MasterProductResponse> getOfficialPromotions(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<MasterProduct> promotionsPage = masterProductRepository.findOfficialPromotions(pageable);
+
+        List<MasterProductResponse> content = promotionsPage.getContent().stream()
+                .map(this::mapToMasterProductResponse)
+                .toList();
+
+        return new PagedResponse<>(
+                content,
+                promotionsPage.getNumber(),
+                promotionsPage.getTotalElements(),
+                promotionsPage.getTotalPages()
+        );
+    }
+
+    private static final List<String> CORE_BASKET = List.of(
+            "Albany Superior Sliced White Bread Loaf 700g",
+            "Clover Full Cream Milk 2L",
+            "Coca-Cola Zero Sugar Soft Drink 2L",
+            "Tastic Long Grain Parboiled Rice 2kg",
+            "White Star Super Maize Meal 1kg"
+    );
+
+    @Transactional(readOnly = true)
+    public List<BasketTrendProjection> getBasketTrends() {
+        return priceLogRepository.getDailyBasketTrend(CORE_BASKET);
+    }
+
+    @Transactional(readOnly = true)
+    public List<String> getBasketItemNames() {
+        return masterProductRepository.findProductsInTrendBasket(CORE_BASKET);
+    }
+
 
     private MasterProductResponse mapToMasterProductResponse(MasterProduct master) {
         List<StoreItemResponse> itemResponses = master.getStoreItems().stream()
@@ -84,6 +155,10 @@ public class ProductService {
                 item.getBrand(),
                 item.getStoreSpecificName(),
                 item.getCurrentPrice(),
+                item.getOldPrice(),
+                item.getIsOnPromotion(),
+                item.getPromotionText(),
+                item.getBarcode(),
                 item.getProductUrl(),
                 item.getImageUrl(),
                 item.getLastUpdated()

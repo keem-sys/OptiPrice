@@ -15,7 +15,8 @@ public class MasterProduct {
     private Long id;
     private String genericName;
     private String category;
-
+    @Column(name = "fingerprint", length = 500)
+    private String fingerprint;
     @BatchSize(size = 20)
     @OneToMany(mappedBy = "masterProduct")
     private List<StoreItem> storeItems;

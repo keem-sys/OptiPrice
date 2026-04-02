@@ -18,12 +18,10 @@ interface ComparisonTableProps {
 }
 
 export function ComparisonTable({ items }: ComparisonTableProps) {
-    // 2. Optimization: Only re-sort if 'items' actually changes
     const sortedItems = useMemo(() => {
         return [...items].sort((a, b) => a.price - b.price);
     }, [items]);
 
-    // Handle empty state gracefully
     if (!items.length) return null;
 
     const lowestPrice = sortedItems[0]?.price;
@@ -67,6 +65,13 @@ export function ComparisonTable({ items }: ComparisonTableProps) {
                                         <span className="font-semibold text-slate-700 line-clamp-2 leading-tight">
                                             {item.storeSpecificName}
                                         </span>
+
+                                        {item.barcode && (
+                                            <span className="text-[10px] text-slate-400 font-mono mt-0.5">
+                                                EAN: {item.barcode}
+                                            </span>
+                                        )}
+
 
                                         {/* Meta info - Hidden on mobile to save space */}
                                         <div className="hidden sm:flex flex-col gap-1 mt-1">

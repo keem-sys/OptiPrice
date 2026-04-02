@@ -8,6 +8,8 @@ public record ShopriteProduct(
         String id,
         String name,
         String price,
+        @JsonProperty("unit_sale_price")
+        String unitSalePrice,
         @JsonProperty("brand")
         String brand,
         String stock,
@@ -16,8 +18,8 @@ public record ShopriteProduct(
         String productUrl,
         String barcode
 ) {
-        public ShopriteProduct withUrl(String url, String foundBarcode) {
-                return new ShopriteProduct(id, name, price, brand, stock, productImageUrl, url, foundBarcode);
+        public ShopriteProduct withUrlAndBarcode(String url, String foundBarcode) {
+                return new ShopriteProduct(id, name, price, unitSalePrice, brand, stock, productImageUrl, url, foundBarcode);
         }
 
         public boolean isAvailable() {

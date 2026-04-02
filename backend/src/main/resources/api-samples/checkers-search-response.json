@@ -1,0 +1,40 @@
+{
+  "totalCount": 81,
+  "products": [
+    {
+      "id": "5d3af640f434cf8420737fbd",
+      "name": "Nulaid Extra Large Eggs 18 Pack",
+      "displayName": "Nulaid Extra Large Eggs 18 Pack",
+      "description": "Experience the vitality of farm-fresh goodness...",
+      "articleNumber": "10125871",
+      "price": 69.99,
+      "oldPrice": 6999,
+      "priceWithoutDecimal": 6999,
+      "priceFactor": 100,
+      "isOnPromotion": false,
+      "isStockAvailable": true,
+      "stockOnHand": 1286,
+      "imageId": "63d4b9f05d93af89d03d67af",
+      "barcodes": [
+        "6001619246043"
+      ],
+      "bonusBuy": {
+        "code": "201236977",
+        "name": "Now R49.99",
+        "shortDescription": "Now R49.99",
+        "discountValue": 49.99,
+        "memberType": {
+          "code": "fox_members",
+          "name": "Xtra Savings Members"
+        }
+      },
+      "attributes": [
+        {
+          "name": "Egg Size",
+          "value": "Extra Large"
+        }
+      ],
+      "imageProductCardURL": "https://catalog.sixty60.co.za/v2/files/63d4b9f05d93af89d03d67af?width=600&height=600"
+    }
+  ]
+}

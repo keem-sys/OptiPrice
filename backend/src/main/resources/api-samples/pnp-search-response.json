@@ -1,0 +1,71 @@
+{
+  "available": true,
+  "brandSellerId": "UNILEVER S.A.",
+  "categoryNames": [
+    "All Products",
+    "Household & Cleaning",
+    "Kitchen",
+    "Dishwashing",
+    "Dishwash Liquid"
+  ],
+  "code": "000000000001008674_EA",
+  "defaultQuantityOfUom": 1,
+  "images": [
+    {
+      "format": "thumbnail",
+      "imageType": "PRIMARY",
+      "url": "https://cdn-prd-02.pnp.co.za/sys-master/images/hd7/h44/16121635438622/silo-product-image-v2-10Sep2025-180046-6001087404105-Straight_on-351857-1283_96Wx96H"
+    },
+    {
+      "format": "product",
+      "imageType": "PRIMARY",
+      "url": "https://cdn-prd-02.pnp.co.za/sys-master/images/h66/hbc/16121636847646/silo-product-image-v2-10Sep2025-180046-6001087404105-Straight_on-351857-1283_400Wx400H"
+    },
+    {
+      "format": "carousel",
+      "imageType": "PRIMARY",
+      "url": "https://cdn-prd-02.pnp.co.za/sys-master/images/h20/h14/16121634914334/silo-product-image-v2-10Sep2025-180046-6001087404105-Straight_on-351857-1283_300Wx300H"
+    },
+    {
+      "format": "listing",
+      "imageType": "PRIMARY",
+      "url": "https://cdn-prd-02.pnp.co.za/sys-master/images/hf6/hed/16121637273630/silo-product-image-v2-10Sep2025-180046-6001087404105-Straight_on-351857-1283_140Wx140H"
+    }
+  ],
+  "inStockIndicator": true,
+  "name": "Sunlight Antibacterial Dishwashing Liquid 750ml",
+  "numberOfReviews": 0,
+  "potentialPromotions": [
+    {
+      "code": "SCRIPT20260324194944-3000643368",
+      "endDate": "2026-04-08T21:59:59+0000",
+      "promotionDisplayType": "SMART_SHOPPER",
+      "promotionTextMessage": "R29.99 ",
+      "startDate": "2026-03-24T22:00:00+0000",
+      "valid": false
+    }
+  ],
+  "price": {
+    "average": false,
+    "currencyIso": "ZAR",
+    "formattedValue": "R37.99",
+    "oldPrice": 0,
+    "oldPriceFormattedValue": "R0.00",
+    "onlineOnlyPrice": false,
+    "priceType": "BUY",
+    "savings": 0,
+    "savingsFormattedValue": "R0.00",
+    "value": 37.99
+  },
+  "productDisplayBadges": [
+    {
+      "displayGroup": "group4",
+      "displayName": "SMART SHOPPER"
+    }
+  ],
+  "quantityType": "NORMAL",
+  "sponsoredProduct": false,
+  "stock": {
+    "stockLevelStatus": "inStock"
+  }
+}

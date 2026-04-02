@@ -12,6 +12,7 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from "@/components/ui/pagination";
+import {SearchBar} from "@/components/search/SearchBar.tsx";
 
 export default function Home() {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -30,6 +31,12 @@ export default function Home() {
             );
         }
     }, [debouncedSearchTerm, queryInUrl, setSearchParams]);
+
+    useEffect(() => {
+        if (queryInUrl === "" && searchTerm !== "") {
+            setSearchTerm("");
+        }
+    }, [queryInUrl]);
 
     const { data, isLoading, isFetching, isError, error } = useSearchProducts(
         queryInUrl,
@@ -53,12 +60,14 @@ export default function Home() {
 
     return (
         <div className="min-h-screen bg-slate-50 pb-20">
-            <Hero
-                onSearch={handleSearchInput}
-                loading={isLoading || isFetching}
-                initialValue={searchTerm}
-                compact={!!searchTerm}
-            />
+            <Hero compact={!!searchTerm}>
+                <SearchBar
+                    onSearch={handleSearchInput}
+                    loading={isLoading || isFetching}
+                    initialValue={searchTerm}
+                    showTags={!searchTerm}
+                />
+            </Hero>
 
             <div className="container mx-auto px-4">
                 {isError && (

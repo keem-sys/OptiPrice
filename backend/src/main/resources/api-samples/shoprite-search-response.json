@@ -1,0 +1,182 @@
+[
+  {
+    "product": "10127033EA",
+    "information": [
+      {
+        "price": {
+          "value": 6.99,
+          "promotionalPrice": false,
+          "endDate": ""
+        },
+        "stock": "1",
+        "salePrice": "",
+        "includedInBonusBuys": [],
+        "htmlBBs": "<div class=\"product-frame\">...</div>",
+        "htmlAvailability": "<div class=\"js-available-in-store\"></div>",
+        "icons": [],
+        "externalUrls": {
+          "buyNowUrl": ""
+        }
+      }
+    ]
+  },
+  {
+    "product": "10125869EA",
+    "information": [
+      {
+        "price": {
+          "value": 44.99,
+          "promotionalPrice": true,
+          "endDate": "Valid until 12 April 2026"
+        },
+        "stock": "1",
+        "salePrice": "",
+        "includedInBonusBuys": [
+          {
+            "code": "201243960",
+            "name": "Bundle Deal"
+          }
+        ],
+        "htmlBBs": "<div class=\"product-frame\">...</div>",
+        "htmlAvailability": "<div class=\"js-available-in-store\"></div>",
+        "icons": [
+          {
+            "type": "XTRA_SAVE",
+            "position": "RIGHT",
+            "styleClass": "xtra-savings",
+            "text": "Xtra Savings",
+            "imageUrl": ""
+          },
+          {
+            "type": "SAVE",
+            "position": "RIGHT",
+            "styleClass": "save",
+            "text": "Save",
+            "imageUrl": ""
+          }
+        ],
+        "externalUrls": {
+          "buyNowUrl": ""
+        }
+      }
+    ]
+  },
+  {
+    "product": "10419684EA",
+    "information": [
+      {
+        "price": {
+          "value": 24.99,
+          "promotionalPrice": false,
+          "endDate": ""
+        },
+        "stock": "1",
+        "salePrice": "",
+        "includedInBonusBuys": [],
+        "htmlBBs": "<div class=\"product-frame\">...</div>",
+        "htmlAvailability": "<div class=\"js-available-in-store\"></div>",
+        "icons": [],
+        "externalUrls": {
+          "buyNowUrl": ""
+        }
+      }
+    ]
+  },
+  {
+    "product": "10387778EA",
+    "information": [
+      {
+        "price": {
+          "value": 89.99,
+          "promotionalPrice": false,
+          "endDate": ""
+        },
+        "stock": "1",
+        "salePrice": "79.99",
+        "includedInBonusBuys": [
+          {
+            "code": "201251118",
+            "name": "Now R79.99"
+          }
+        ],
+        "htmlBBs": "<div class=\"product-frame\">...</div>",
+        "htmlAvailability": "<div class=\"js-available-in-store\"></div>",
+        "icons": [
+          {
+            "type": "XTRA_SAVE",
+            "position": "RIGHT",
+            "styleClass": "xtra-savings",
+            "text": "Xtra Savings",
+            "imageUrl": ""
+          }
+        ],
+        "externalUrls": {
+          "buyNowUrl": ""
+        }
+      }
+    ]
+  },
+  {
+    "product": "10387779EA",
+    "information": [
+      {
+        "price": {
+          "value": 59.99,
+          "promotionalPrice": false,
+          "endDate": ""
+        },
+        "stock": "1",
+        "salePrice": "49.99",
+        "includedInBonusBuys": [
+          {
+            "code": "201261662",
+            "name": "Now R49.99"
+          },
+          {
+            "code": "201251191",
+            "name": "Now R54.99"
+          },
+          {
+            "code": "201245712",
+            "name": "Bundle Deal"
+          }
+        ],
+        "htmlBBs": "<div class=\"product-frame\">...</div>",
+        "htmlAvailability": "<div class=\"js-available-in-store\"></div>",
+        "icons": [
+          {
+            "type": "XTRA_SAVE",
+            "position": "RIGHT",
+            "styleClass": "xtra-savings",
+            "text": "Xtra Savings",
+            "imageUrl": ""
+          }
+        ],
+        "externalUrls": {
+          "buyNowUrl": ""
+        }
+      }
+    ]
+  },
+  {
+    "product": "10140399EA",
+    "information": [
+      {
+        "price": {
+          "value": 39.99,
+          "promotionalPrice": false,
+          "endDate": ""
+        },
+        "stock": "1",
+        "salePrice": "",
+        "includedInBonusBuys": [],
+        "htmlBBs": "<div class=\"product-frame\">...</div>",
+        "htmlAvailability": "<div class=\"js-available-in-store\"></div>",
+        "icons": [],
+        "externalUrls": {
+          "buyNowUrl": ""
+        }
+      }
+    ]
+  }
+]

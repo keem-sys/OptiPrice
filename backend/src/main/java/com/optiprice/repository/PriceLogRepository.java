@@ -1,5 +1,6 @@
 package com.optiprice.repository;
 
+import com.optiprice.dto.response.BasketTrendProjection;
 import com.optiprice.dto.response.PriceHistoryPoint;
 import com.optiprice.model.PriceLog;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,4 +21,30 @@ public interface PriceLogRepository extends JpaRepository<PriceLog, Long> {
         ORDER BY pl.timestamp ASC
     """)
     List<PriceHistoryPoint> findHistoryByMasterId(@Param("masterId") Long masterId);
+
+    /**
+     * BASKET INDEX
+     * Subquery: Finds up to 10 Master Products that are sold at ALL 3 stores (Fair comparison).
+     * Main Query: Sums the daily price of those exact 10 items for each store.
+     */
+    @Query(value = """
+        SELECT 
+            CAST(pl.timestamp AS DATE) as logDate, 
+            s.name as storeName, 
+            SUM(pl.price) as basketPrice
+        FROM price_log pl
+        JOIN store_item si ON pl.store_item_id = si.id
+        JOIN store s ON si.store_id = s.id
+        JOIN master_product m ON si.master_product_id = m.id
+        WHERE m.generic_name IN :basketItems
+        AND si.master_product_id IN (
+            SELECT master_product_id 
+            FROM store_item 
+            GROUP BY master_product_id 
+            HAVING COUNT(DISTINCT store_id) >= 2
+        )
+        GROUP BY CAST(pl.timestamp AS DATE), s.name
+        ORDER BY logDate ASC
+        """, nativeQuery = true)
+    List<BasketTrendProjection> getDailyBasketTrend(@Param("basketItems") List<String> basketItems);
 }
