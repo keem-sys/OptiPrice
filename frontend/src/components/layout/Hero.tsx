@@ -19,7 +19,7 @@ export function Hero({ compact = false, children }: HeroProps) {
                     <div className="animate-in fade-in slide-in-from-top-4 duration-500">
                         <div className="inline-flex items-center rounded-full border border-indigo-100 bg-indigo-50 px-3 py-1 text-sm font-medium text-indigo-600 mb-8">
                             <Sparkles className="mr-2 h-3.5 w-3.5" />
-                            <span>New: AI Optimized Matching</span>
+                            <span>New Optimized Matching</span>
                         </div>
                         <h1 className="text-4xl font-extrabold text-slate-900 sm:text-6xl mb-6">
                             Compare Groceries with <br />
