@@ -47,6 +47,45 @@ export function PriceTrendsPage() {
 
     const stores = Array.from(new Set(data?.map(d => d.storeName) || []));
 
+    const actualItemCount = basketItems?.length || 0;
+
+    let cheapestStore = "Calculating...";
+    if (chartData.length > 0) {
+        const latestData = chartData[chartData.length - 1];
+        let minPrice = Infinity;
+
+        stores.forEach(store => {
+            const storePrice = latestData[store] as number;
+            if (storePrice && storePrice < minPrice) {
+                minPrice = storePrice;
+                cheapestStore = store;
+            }
+        });
+    }
+
+    let volatility = "Stable";
+    let volatilityColor = "text-emerald-500";
+
+    if (chartData.length > 1) {
+        const oldestData = chartData[0];
+        const newestData = chartData[chartData.length - 1];
+
+        const storeToTrack = stores[0];
+        const oldPrice = oldestData[storeToTrack] as number;
+        const newPrice = newestData[storeToTrack] as number;
+
+        if (oldPrice && newPrice) {
+            const percentChange = Math.abs((newPrice - oldPrice) / oldPrice) * 100;
+            if (percentChange > 5) {
+                volatility = "High";
+                volatilityColor = "text-red-500";
+            } else if (percentChange > 2) {
+                volatility = "Moderate";
+                volatilityColor = "text-orange-500";
+            }
+        }
+    }
+
     return (
         <div className="container mx-auto px-4 py-8 max-w-6xl">
             {/* HERO */}
@@ -64,21 +103,34 @@ export function PriceTrendsPage() {
 
             {/* SUMMARY CARDS */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+
+                {/* DYNAMIC CHEAPEST STORE */}
                 <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                     <p className="text-sm text-slate-500 font-medium">Cheapest Store Today</p>
-                    <h3 className="text-2xl font-bold text-emerald-600">Shoprite</h3>
-                    <p className="text-xs text-slate-400 mt-1">Based on the essential basket total</p>
+                    <h3 className="text-2xl font-bold text-indigo-600">
+                        {isLoading ? "..." : cheapestStore}
+                    </h3>
+                    <p className="text-xs text-slate-400 mt-1">Based on today's basket total</p>
                 </div>
+
+                {/* DYNAMIC ITEM COUNT */}
                 <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                     <p className="text-sm text-slate-500 font-medium">Items in Comparison</p>
-                    <h3 className="text-2xl font-bold text-slate-800">10 Products</h3>
-                    <p className="text-xs text-slate-400 mt-1">Identical brands matched across stores</p>
+                    <h3 className="text-2xl font-bold text-slate-800">
+                        {isLoading ? "..." : `${actualItemCount} Products`}
+                    </h3>
+                    <p className="text-xs text-slate-400 mt-1">Identical items across stores</p>
                 </div>
+
+                {/* DYNAMIC VOLATILITY */}
                 <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                     <p className="text-sm text-slate-500 font-medium">Market Volatility</p>
-                    <h3 className="text-2xl font-bold text-orange-500">Low</h3>
-                    <p className="text-xs text-slate-400 mt-1">Prices are stable this week</p>
+                    <h3 className={`text-2xl font-bold ${volatilityColor}`}>
+                        {isLoading ? "..." : volatility}
+                    </h3>
+                    <p className="text-xs text-slate-400 mt-1">7-day price fluctuation</p>
                 </div>
+
             </div>
 
 

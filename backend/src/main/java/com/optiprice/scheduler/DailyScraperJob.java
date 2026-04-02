@@ -21,11 +21,14 @@ public class DailyScraperJob {
     private final StoreItemRepository storeItemRepository;
 
     private final List<String> ESSENTIALS = List.of(
+            "Maize Meal",
+            "Tastic Rice",
+            "Eggs",
             "Full Cream Milk 2L",
-            "White Bread 700g",
+            "White Bread",
             "Sunflower Oil 2L",
             "Coca-Cola 2L",
-            "Tastic Rice 2kg"
+            "Tomato Sauce"
     );
 
     @Scheduled(cron = "0 0 4 * * *")

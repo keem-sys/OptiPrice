@@ -35,15 +35,16 @@ public interface PriceLogRepository extends JpaRepository<PriceLog, Long> {
         FROM price_log pl
         JOIN store_item si ON pl.store_item_id = si.id
         JOIN store s ON si.store_id = s.id
-        WHERE si.master_product_id IN (
+        JOIN master_product m ON si.master_product_id = m.id
+        WHERE m.generic_name IN :basketItems
+        AND si.master_product_id IN (
             SELECT master_product_id 
             FROM store_item 
             GROUP BY master_product_id 
             HAVING COUNT(DISTINCT store_id) >= 2
-            LIMIT 10
         )
         GROUP BY CAST(pl.timestamp AS DATE), s.name
         ORDER BY logDate ASC
         """, nativeQuery = true)
-    List<BasketTrendProjection> getDailyBasketTrend();
+    List<BasketTrendProjection> getDailyBasketTrend(@Param("basketItems") List<String> basketItems);
 }

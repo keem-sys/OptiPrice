@@ -108,14 +108,22 @@ public class ProductService {
         );
     }
 
+    private static final List<String> CORE_BASKET = List.of(
+            "Albany Superior Sliced White Bread Loaf 700g",
+            "Clover Full Cream Milk 2L",
+            "Coca-Cola Zero Sugar Soft Drink 2L",
+            "Tastic Long Grain Parboiled Rice 2kg",
+            "White Star Super Maize Meal 1kg"
+    );
+
     @Transactional(readOnly = true)
     public List<BasketTrendProjection> getBasketTrends() {
-        return priceLogRepository.getDailyBasketTrend();
+        return priceLogRepository.getDailyBasketTrend(CORE_BASKET);
     }
 
     @Transactional(readOnly = true)
     public List<String> getBasketItemNames() {
-        return masterProductRepository.findProductsInTrendBasket();
+        return masterProductRepository.findProductsInTrendBasket(CORE_BASKET);
     }
 
 

@@ -76,17 +76,17 @@ public interface MasterProductRepository extends JpaRepository<MasterProduct, Lo
     Page<MasterProduct> findProductsWithPriceGap(@Param("minGap") java.math.BigDecimal minGap, Pageable pageable);
 
     @Query(value = """
-    SELECT generic_name
-    FROM master_product
-    WHERE id IN (
-        SELECT master_product_id
-        FROM store_item
-        GROUP BY master_product_id
-        HAVING COUNT(DISTINCT store_id) = 3
-        LIMIT 10
-    )
-    """, nativeQuery = true)
-    List<String> findProductsInTrendBasket();
+        SELECT generic_name 
+        FROM master_product 
+        WHERE generic_name IN :basketItems
+        AND id IN (
+            SELECT master_product_id 
+            FROM store_item 
+            GROUP BY master_product_id 
+            HAVING COUNT(DISTINCT store_id) >= 2
+        )
+        """, nativeQuery = true)
+    List<String> findProductsInTrendBasket(@Param("basketItems") List<String> basketItems);
 
     @Query(value = """
     SELECT m.*
