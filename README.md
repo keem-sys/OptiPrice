@@ -3,6 +3,8 @@
 **OptiPrice** is a price aggregator platform designed to help South Africans combat inflation 
 by finding the cheapest groceries across major retailers: **Checkers**, **Pick n Pay**, and **Shoprite**.
 
+![OptiPrice Website Image](OptiPrice-img.png)
+
 ---
 
 ## Core Features
