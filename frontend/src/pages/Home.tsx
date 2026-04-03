@@ -3,7 +3,7 @@ import { Hero } from "@/components/layout/Hero";
 import { ProductGrid } from "@/components/products/ProductGrid";
 import { useSearchProducts } from "@/hooks/useProducts";
 import { useDebounce } from "@/hooks/useDebounce";
-import { useEffect, useState } from "react";
+import {useCallback, useEffect, useState} from "react";
 import { Search } from "lucide-react";
 import {
     Pagination,
@@ -23,19 +23,22 @@ export default function Home() {
     const [searchTerm, setSearchTerm] = useState(queryInUrl);
     const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
-    useEffect(() => {
-        if (debouncedSearchTerm !== queryInUrl) {
-            setSearchParams(
-                debouncedSearchTerm ? { q: debouncedSearchTerm } : {},
-                { replace: true }
-            );
-        }
-    }, [debouncedSearchTerm, queryInUrl, setSearchParams]);
+    const updateUrlParams = useCallback((query: string, page: number) => {
+        const params: Record<string, string> = {};
+        if (query) params.q = query;
+        if (page > 0) params.p = page.toString();
+
+        setSearchParams(params, { replace: true });
+    }, [setSearchParams]);
 
     useEffect(() => {
-        if (queryInUrl === "" && searchTerm !== "") {
-            setSearchTerm("");
+        if (debouncedSearchTerm !== queryInUrl) {
+            updateUrlParams(debouncedSearchTerm, 0);
         }
+    }, [debouncedSearchTerm, queryInUrl, updateUrlParams]);
+
+    useEffect(() => {
+        setSearchTerm(queryInUrl);
     }, [queryInUrl]);
 
     const { data, isLoading, isFetching, isError, error } = useSearchProducts(
@@ -43,20 +46,32 @@ export default function Home() {
         pageInUrl
     );
 
-
     const results = queryInUrl ? (data?.content || []) : [];
-
     const totalPages = data?.totalPages || 0;
 
     const handleSearchInput = (query: string) => {
         setSearchTerm(query);
     };
 
-    const handlePageChange = (newPage: number) => {
-        setSearchParams(
-            { q: queryInUrl, p: newPage.toString() },
-        );
-    };
+    const handlePageChange = useCallback((newPage: number) => {
+        updateUrlParams(queryInUrl, newPage);
+    }, [queryInUrl, updateUrlParams]);
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+            if (e.key === "ArrowLeft" && pageInUrl > 0) {
+                handlePageChange(pageInUrl - 1);
+            } else if (e.key === "ArrowRight" && pageInUrl < totalPages - 1) {
+                handlePageChange(pageInUrl + 1);
+            }
+        };
+
+        window.addEventListener("keydown", handleKeyDown);
+
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [pageInUrl, totalPages, handlePageChange]);
 
     return (
         <div className="min-h-screen bg-slate-50 pb-20">

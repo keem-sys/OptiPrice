@@ -9,7 +9,7 @@ export default function RootLayout() {
 
             <Navbar />
 
-            <main className="flex-grow w-full">
+            <main className="grow w-full">
                 <Outlet />
             </main>
 

@@ -3,15 +3,14 @@ import { formatCurrency } from "@/lib/formatters";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ShoppingBag, ArrowRight } from "lucide-react";
-import { Link, useSearchParams } from "react-router-dom";
+import {Link, useLocation} from "react-router-dom";
 
 interface ProductCardProps {
     product: MasterProduct;
 }
 
 export function ProductCard({ product }: ProductCardProps) {
-    const [searchParams] = useSearchParams();
-    const currentQuery = searchParams.get("q");
+    const location = useLocation();
 
     const storeCount = product.storeItems.length;
 
@@ -97,7 +96,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
                     <Link
                         to={`/product/${product.id}`}
-                        state={{ previousSearch: currentQuery }}
+                        state={{ from: location.pathname + location.search }}
                         className="inline-flex items-center gap-2 text-sm font-bold
                         text-indigo-600 hover:text-indigo-700 after:absolute after:inset-0"
                     >

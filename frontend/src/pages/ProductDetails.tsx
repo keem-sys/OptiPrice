@@ -1,21 +1,23 @@
-import { Link, useParams, useLocation, createSearchParams } from "react-router-dom";
-import { useProductDetails } from "@/hooks/useProducts"; // Hook
+import {Link, useParams, useLocation, useNavigate} from "react-router-dom";
+import { useProductDetails } from "@/hooks/useProducts";
 import { ComparisonTable } from "@/components/products/ComparisonTable";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Loader2, AlertCircle } from "lucide-react";
 import {PriceHistoryChart} from "@/components/products/PriceHistoryChart.tsx";
+import React from "react";
 
 export default function ProductDetails() {
     const { id } = useParams<{ id: string }>();
-
+    const navigate = useNavigate();
     const location = useLocation();
-    const previousSearch = location.state?.previousSearch;
+    const fromUrl = location.state?.from || "/";
 
-    const backLink = previousSearch
-        ? `/?${createSearchParams({ q: previousSearch }).toString()}`
-        : "/";
-
-    const backLabel = "Back to Search";
+    const handleBack = (e: React.MouseEvent) => {
+        if (location.state?.from) {
+            e.preventDefault();
+            navigate(-1);
+        }
+    };
 
     const { data: product, isLoading, isError } = useProductDetails(id || "");
 
@@ -37,8 +39,8 @@ export default function ProductDetails() {
         <div className="container mx-auto max-w-5xl px-4 pt-8 pb-20">
             <div className="mb-8">
                 <Button variant="ghost" asChild className="mb-4 pl-0 hover:bg-transparent hover:text-indigo-600">
-                    <Link to={backLink} className="gap-2">
-                        <ArrowLeft size={16} /> {backLabel}
+                    <Link to={fromUrl} onClick={handleBack} className="gap-2 flex items-center">
+                        <ArrowLeft size={16} /> Back
                     </Link>
                 </Button>
 

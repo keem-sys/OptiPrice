@@ -64,7 +64,7 @@ export function SearchBar({
             {showTags && (
                 <div className="mt-6 flex flex-wrap justify-center gap-2 text-sm text-slate-500">
                     <span>Trending:</span>
-                    {["Full Cream Milk", "Brown Bread", "Coca Cola", "Eggs 18"].map((tag) => (
+                    {["Full Cream Milk", "Brown Bread", "Coca Cola", "Eggs"].map((tag) => (
                         <Badge
                             key={tag}
                             variant="secondary"
