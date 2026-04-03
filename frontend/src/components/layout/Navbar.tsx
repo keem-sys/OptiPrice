@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ShoppingBasket, Menu, Heart, Search, X } from "lucide-react";
 import { SiGithub } from "react-icons/si";
@@ -13,6 +13,7 @@ import {
     SheetDescription
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import {toast} from "sonner";
 
 export function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
@@ -29,6 +30,12 @@ export function Navbar() {
         { href: "/deals", label: "Daily Deals" },
         { href: "/trends", label: "Price Trends" },
     ];
+
+    const handleWatchlistClick = () => {
+        toast.info("Watchlist Feature Coming Soon!", {
+            duration: 2500,
+        });
+    };
 
     const isActive = (path: string) => location.pathname === path;
     const isHomePage = location.pathname === "/";
@@ -55,7 +62,7 @@ export function Navbar() {
         };
     }, [isSearchOpen]);
 
-    const handleGlobalSearch = (e: React.FormEvent) => {
+    const handleGlobalSearch = (e: React.SyntheticEvent) => {
         e.preventDefault();
         if (searchQuery.trim()) {
             navigate(`/?q=${encodeURIComponent(searchQuery.trim())}`);
@@ -160,7 +167,7 @@ export function Navbar() {
 
 
                     {/* Watchlist */}
-                    <Button variant="ghost" size="icon" className="text-slate-500 hover:text-red-500 hover:bg-red-50">
+                    <Button variant="ghost" size="icon"  onClick={handleWatchlistClick} className="text-slate-500 hover:text-red-500 hover:bg-red-50 cursor-pointer">
                         <Heart size={20} />
                         <span className="sr-only">Watchlist</span>
                     </Button>

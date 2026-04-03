@@ -32,14 +32,15 @@ export default function Home() {
     }, [setSearchParams]);
 
     useEffect(() => {
-        if (debouncedSearchTerm !== queryInUrl) {
-            updateUrlParams(debouncedSearchTerm, 0);
-        }
-    }, [debouncedSearchTerm, queryInUrl, updateUrlParams]);
-
-    useEffect(() => {
         setSearchTerm(queryInUrl);
     }, [queryInUrl]);
+
+    useEffect(() => {
+        if (debouncedSearchTerm === queryInUrl) return;
+
+        updateUrlParams(debouncedSearchTerm, 0);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [debouncedSearchTerm]);
 
     const { data, isLoading, isFetching, isError, error } = useSearchProducts(
         queryInUrl,
