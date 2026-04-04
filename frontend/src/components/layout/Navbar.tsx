@@ -213,7 +213,7 @@ export function Navbar() {
                                     onClick={handleWatchlistClick}
                                 >
                                     <Heart className="h-5 w-5" />
-                                    My Watchlist
+                                    Watchlist
                                 </Button>
                                 <Button
                                     variant="ghost"
@@ -222,7 +222,7 @@ export function Navbar() {
                                 >
                                     <a href="https://github.com/keem-sys/OptiPrice" target="_blank" rel="noreferrer">
                                         <SiGithub className="h-5 w-5" />
-                                        GitHub Repository
+                                        Source Code
                                     </a>
                                 </Button>
                             </SheetFooter>

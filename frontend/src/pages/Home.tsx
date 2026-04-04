@@ -3,8 +3,9 @@ import { Hero } from "@/components/layout/Hero";
 import { ProductGrid } from "@/components/products/ProductGrid";
 import { useSearchProducts } from "@/hooks/useProducts";
 import { useDebounce } from "@/hooks/useDebounce";
-import {useCallback, useEffect, useState} from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { Search } from "lucide-react";
+import { cn } from "@/lib/utils";
 import {
     Pagination,
     PaginationContent,
@@ -12,7 +13,7 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from "@/components/ui/pagination";
-import {SearchBar} from "@/components/search/SearchBar.tsx";
+import { SearchBar } from "@/components/search/SearchBar";
 
 export default function Home() {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -22,6 +23,8 @@ export default function Home() {
 
     const [searchTerm, setSearchTerm] = useState(queryInUrl);
     const debouncedSearchTerm = useDebounce(searchTerm, 500);
+
+    const gridTopRef = useRef<HTMLDivElement>(null);
 
     const updateUrlParams = useCallback((query: string, page: number) => {
         const params: Record<string, string> = {};
@@ -39,15 +42,19 @@ export default function Home() {
         if (debouncedSearchTerm === queryInUrl) return;
 
         updateUrlParams(debouncedSearchTerm, 0);
+
+        if (document.activeElement instanceof HTMLInputElement) {
+            document.activeElement.blur();
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [debouncedSearchTerm]);
+    },[debouncedSearchTerm]);
 
     const { data, isLoading, isFetching, isError, error } = useSearchProducts(
         queryInUrl,
         pageInUrl
     );
 
-    const results = queryInUrl ? (data?.content || []) : [];
+    const results = queryInUrl ? (data?.content || []) :[];
     const totalPages = data?.totalPages || 0;
 
     const handleSearchInput = (query: string) => {
@@ -56,7 +63,12 @@ export default function Home() {
 
     const handlePageChange = useCallback((newPage: number) => {
         updateUrlParams(queryInUrl, newPage);
-    }, [queryInUrl, updateUrlParams]);
+
+        if (gridTopRef.current) {
+            const y = gridTopRef.current.getBoundingClientRect().top + window.scrollY - 80;
+            window.scrollTo({ top: y, behavior: "smooth" });
+        }
+    },[queryInUrl, updateUrlParams]);
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -70,9 +82,8 @@ export default function Home() {
         };
 
         window.addEventListener("keydown", handleKeyDown);
-
         return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [pageInUrl, totalPages, handlePageChange]);
+    },[pageInUrl, totalPages, handlePageChange]);
 
     return (
         <div className="min-h-screen bg-slate-50 pb-20">
@@ -85,33 +96,43 @@ export default function Home() {
                 />
             </Hero>
 
-            <div className="container mx-auto px-4">
+            <div className="container mx-auto px-4" ref={gridTopRef}>
                 {isError && (
-                    <div className="p-4 mb-8 text-sm text-red-700 bg-red-100 rounded-lg max-w-2xl mx-auto text-center">
-                        <span className="font-medium">Error:</span> {(error as Error).message}
+                    <div className="p-4 mb-8 text-sm text-red-700 bg-red-100 rounded-lg max-w-2xl mx-auto text-center border border-red-200">
+                        <span className="font-semibold">Oops! Something went wrong:</span> {(error as Error).message}
                     </div>
                 )}
 
                 {queryInUrl && (
-                    <ProductGrid
-                        products={results}
-                        loading={isLoading || (isFetching && !data)}
-                    />
+                    <div className={cn(
+                        "transition-opacity duration-300",
+                        (isFetching && !isLoading) ? "opacity-50 pointer-events-none" : "opacity-100"
+                    )}>
+                        <ProductGrid
+                            products={results}
+                            loading={isLoading || (isFetching && !data)}
+                        />
+                    </div>
                 )}
 
                 {!isLoading && !isError && results.length > 0 && totalPages > 1 && (
                     <div className="mt-12 animate-in fade-in slide-in-from-bottom-4">
                         <Pagination>
-                            <PaginationContent>
+                            <PaginationContent className="flex flex-wrap justify-center gap-2">
                                 <PaginationItem>
                                     <PaginationPrevious
                                         onClick={() => handlePageChange(Math.max(0, pageInUrl - 1))}
-                                        className={pageInUrl === 0 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                                        className={cn(
+                                            "transition-colors",
+                                            pageInUrl === 0
+                                                ? "pointer-events-none opacity-50 bg-transparent"
+                                                : "cursor-pointer hover:bg-slate-200"
+                                        )}
                                     />
                                 </PaginationItem>
 
                                 <PaginationItem>
-                                    <span className="px-4 text-sm text-slate-500 font-medium">
+                                    <span className="px-4 py-2 text-sm text-slate-600 font-medium bg-white rounded-md shadow-sm border border-slate-200">
                                         Page {pageInUrl + 1} of {totalPages}
                                     </span>
                                 </PaginationItem>
@@ -119,7 +140,12 @@ export default function Home() {
                                 <PaginationItem>
                                     <PaginationNext
                                         onClick={() => handlePageChange(Math.min(totalPages - 1, pageInUrl + 1))}
-                                        className={pageInUrl === totalPages - 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                                        className={cn(
+                                            "transition-colors",
+                                            pageInUrl === totalPages - 1
+                                                ? "pointer-events-none opacity-50 bg-transparent"
+                                                : "cursor-pointer hover:bg-slate-200"
+                                        )}
                                     />
                                 </PaginationItem>
                             </PaginationContent>
@@ -128,12 +154,15 @@ export default function Home() {
                 )}
 
                 {!isLoading && !isFetching && debouncedSearchTerm && results.length === 0 && !isError && (
-                    <div className="flex flex-col items-center justify-center py-20 text-slate-400 animate-in fade-in zoom-in duration-300">
-                        <div className="bg-slate-100 p-6 rounded-full mb-4">
+                    <div className="flex flex-col items-center justify-center py-20 text-slate-500 animate-in fade-in zoom-in duration-300">
+                        <div className="bg-white p-6 rounded-full mb-6 shadow-sm border border-slate-100">
                             <Search size={48} className="text-slate-300" />
                         </div>
-                        <h3 className="text-xl font-semibold text-slate-700">No products found</h3>
-                        <p>We couldn't find matches for "{debouncedSearchTerm}".</p>
+                        <h3 className="text-xl font-semibold text-slate-800 mb-2">No products found</h3>
+                        <p className="text-center max-w-sm">
+                            We couldn't find any groceries matching "<span className="font-semibold text-slate-700">{debouncedSearchTerm}</span>".
+                            Try checking your spelling or using more general terms.
+                        </p>
                     </div>
                 )}
             </div>
