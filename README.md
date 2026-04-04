@@ -76,4 +76,4 @@ by finding the cheapest groceries across major retailers: **Checkers**, **Pick n
 ---
 
 ## License
-This project is licensed under the Apache License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the  GNU AGPL v3.0 (Affero General Public License) - see the [LICENSE](LICENSE) file for details.
