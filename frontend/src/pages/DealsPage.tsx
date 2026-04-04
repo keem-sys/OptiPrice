@@ -66,7 +66,7 @@ export function DealsPage() {
                         "bg-linear-to-r from-violet-500 to-purple-600"
             )}>
                 <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl flex items-center gap-3">
-                    {dealType === "arbitrage" ? <><Flame className="text-yellow-300"/> Huge Store Gaps</> :
+                    {dealType === "arbitrage" ? <><Flame className="text-yellow-300"/>Store Gaps</> :
                         dealType === "drops" ? <><TrendingDown className="text-emerald-200"/> Recent Price Drops</> :
                             <><Sparkles className="text-violet-200"/> Official Store Promotions</>}
                 </h1>

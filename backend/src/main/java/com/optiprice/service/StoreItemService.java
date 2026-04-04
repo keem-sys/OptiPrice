@@ -57,8 +57,14 @@ public class StoreItemService {
         if (item.getMasterProduct() == null && barcode != null && !barcode.isEmpty()) {
             itemRepo.findFirstByBarcode(barcode).ifPresent(existingItem -> {
                 if (existingItem.getMasterProduct() != null) {
-                    item.setMasterProduct(existingItem.getMasterProduct());
-                    System.out.println("BARCODE MATCH: Linked '" + name + "' to existing Master Product.");
+                    BigDecimal existingPrice = existingItem.getCurrentPrice();
+                    double ratio = price.doubleValue() / existingPrice.doubleValue();
+                    if (ratio > 0.4 && ratio < 2.5) {
+                        item.setMasterProduct(existingItem.getMasterProduct());
+                        System.out.println("BARCODE MATCH: Linked '" + name + "'");
+                    } else {
+                        System.out.println("BARCODE CONFLICT: Barcode matches but Price Ratio is " + ratio + ". Treating as different product.");
+                    }
                 }
             });
         }
@@ -90,6 +96,7 @@ public class StoreItemService {
             String finalCleanName = cleanName;
             masterProductRepository.findByGenericNameIgnoreCase(cleanName)
                     .stream()
+                    .filter(existingMaster -> !hasBarcodeConflict(existingMaster, barcode))
                     .findFirst()
                     .ifPresent(existingMaster -> {
                         item.setMasterProduct(existingMaster);
@@ -112,6 +119,7 @@ public class StoreItemService {
         if (item.getMasterProduct() == null) {
             String finalCleanName1 = cleanName;
             masterProductRepository.findFirstByFingerprint(fingerprint)
+                    .filter(existingMaster -> !hasBarcodeConflict(existingMaster, barcode))
                     .ifPresent(existingMaster -> {
                         item.setMasterProduct(existingMaster);
                         System.out.println(" FINGERPRINT MATCH: Linked swapped words for '" + finalCleanName1 + "'");
@@ -164,5 +172,19 @@ public class StoreItemService {
         String[] words = clean.split("\\s+");
         java.util.Arrays.sort(words);
         return String.join(" ", words).trim();
+    }
+
+    private boolean hasBarcodeConflict(MasterProduct potentialMaster, String incomingBarcode) {
+        if (incomingBarcode == null || incomingBarcode.isEmpty()) {
+            return false;
+        }
+
+        for (StoreItem sibling : potentialMaster.getStoreItems()) {
+            String siblingBarcode = sibling.getBarcode();
+            if (siblingBarcode != null && !siblingBarcode.isEmpty() && !siblingBarcode.equals(incomingBarcode)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

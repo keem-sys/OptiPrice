@@ -4,6 +4,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ShoppingBag, ArrowRight } from "lucide-react";
 import {Link, useLocation} from "react-router-dom";
+import {cn} from "@/lib/utils.ts";
 
 interface ProductCardProps {
     product: MasterProduct;
@@ -13,6 +14,10 @@ export function ProductCard({ product }: ProductCardProps) {
     const location = useLocation();
 
     const storeCount = product.storeItems.length;
+
+    const promoItem = [...product.storeItems]
+        .filter(i => i.isOnPromotion)
+        .sort((a, b) => a.price - b.price)[0];
 
     if (storeCount === 0) {
         return (
@@ -35,7 +40,6 @@ export function ProductCard({ product }: ProductCardProps) {
     const image = product.storeItems.find((i) => i.imageUrl)?.imageUrl
         || "https://placehold.co/400x400?text=No+Image";
 
-
     return (
         <Card className="group relative h-full overflow-hidden border-slate-200 bg-white
         transition-all hover:-translate-y-1 hover:shadow-lg">
@@ -53,9 +57,18 @@ export function ProductCard({ product }: ProductCardProps) {
                     {product.category || "General"}
                 </Badge>
 
-                {product.storeItems.find(i => i.isOnPromotion) && (
-                    <Badge className="absolute top-3 right-3 bg-red-600 hover:bg-red-700 text-white shadow-md border-none px-3 py-1 font-bold">
-                        {product.storeItems.find(i => i.isOnPromotion)?.promotionText || "On Sale"}
+                {promoItem && (
+                    <Badge
+                        className={cn(
+                            "absolute top-3 right-3 shadow-md border-none px-3 py-1 font-bold text-white",
+                            promoItem.store.name === "Checkers" ? "bg-teal-600" :
+                                promoItem.store.name === "Shoprite" ? "bg-red-600" :
+                                    "bg-blue-900"
+                        )}
+                    >
+                        <span className="flex items-center gap-1">
+                            {promoItem.store.name}: {promoItem.promotionText || "Sale"}
+                        </span>
                     </Badge>
                 )}
             </div>

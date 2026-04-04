@@ -5,14 +5,19 @@ import com.optiprice.dto.pnp.PnpImage;
 import com.optiprice.dto.pnp.PnpProduct;
 import com.optiprice.dto.pnp.PnpPromotion;
 import com.optiprice.dto.shoprite.ShopriteProduct;
+import com.optiprice.model.MasterProduct;
 import com.optiprice.model.Store;
+import com.optiprice.model.StoreItem;
+import com.optiprice.repository.MasterProductRepository;
 import com.optiprice.service.BrandExtractor;
+import com.optiprice.service.MasterProductService;
 import com.optiprice.service.StoreItemService;
 import com.optiprice.service.StoreService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 @Service
@@ -26,6 +31,7 @@ public class ScraperOrchestrator {
     private final StoreService storeService;
     private final StoreItemService storeItemService;
     private final BrandExtractor brandExtractor;
+    private final MasterProductRepository masterProductRepository;
 
     public void scrapeAllStores(String searchTerm) {
         System.out.println("--- Orchestrating SEARCH for: " + searchTerm + " ---");
@@ -89,7 +95,8 @@ public class ScraperOrchestrator {
                     currentPrice = promoPrice;
                     oldPrice = regularPrice;
                     isOnPromotion = true;
-                    promoText = "Xtra Savings";
+                    BigDecimal savings = regularPrice.subtract(promoPrice);
+                    promoText = "Now R" + promoPrice.setScale(2, RoundingMode.HALF_UP);
                 } else {
                     currentPrice = regularPrice;
                 }
@@ -185,11 +192,18 @@ public class ScraperOrchestrator {
                     isOnPromotion = true;
                     promoText = p.bonusBuy().name();
 
-                    Double dealPrice = p.bonusBuy().discountValue();
+                    Double val = p.bonusBuy().discountValue();
+                    String typeCode = (p.bonusBuy().discountType() != null)
+                            ? p.bonusBuy().discountType().code() : "price";
 
-                    if (dealPrice != null && dealPrice > 0) {
-                        currentPrice = BigDecimal.valueOf(dealPrice);
-                        oldPrice = BigDecimal.valueOf(basePrice);
+                    if (val != null && val > 0) {
+                        if ("amount".equalsIgnoreCase(typeCode)) {
+                            currentPrice = BigDecimal.valueOf(basePrice - val);
+                            oldPrice = BigDecimal.valueOf(basePrice);
+                        } else {
+                            currentPrice = BigDecimal.valueOf(val);
+                            oldPrice = BigDecimal.valueOf(basePrice);
+                        }
                     }
                 }
 
@@ -201,8 +215,15 @@ public class ScraperOrchestrator {
                     }
                 }
 
+//                // kip items with 0 price (data errors)
+//                if (currentPrice.compareTo(BigDecimal.ZERO) <= 0) {
+//                    continue;
+//                }
+
+                // Metadata Extraction
                 String name = (p.displayName() != null) ? p.displayName() : p.name();
                 String productUrl = "https://www.checkers.co.za/p/" + p.id();
+
                 String barcode = null;
                 if (p.barcodes() != null && p.barcodes().length > 0) {
                     barcode = extractCleanBarcode(p.barcodes()[0]);
@@ -211,17 +232,35 @@ public class ScraperOrchestrator {
                 String brand = brandExtractor.extractBrand(p.name(), p.brand());
                 String articleSku = p.articleNumber() + p.unitOfMeasure();
 
+                // Save
                 storeItemService.saveOrUpdateItem(
                         store, p.id(), name, brand,
                         currentPrice, oldPrice,
                         p.getImageUrl(), productUrl,
                         knownCategory, barcode, isOnPromotion, promoText, articleSku
                 );
-            } catch (Exception e) { /* skip */ }
+            } catch (Exception e) {
+                System.err.println("Error processing Checkers item: " + e.getMessage());
+            }
         }
     }
 
     // Store Helpers
+
+    public void scrapeSingleTarget(String storeName, String url, String category) {
+        if (storeName.equalsIgnoreCase("Checkers")) {
+            var results = checkersScraper.scrapeCategory(url);
+            processCheckersProducts(results, getCheckersStore(), category);
+        }
+        else if (storeName.equalsIgnoreCase("Pick n Pay")) {
+            var results = pnpScraper.scrapeCategory(url);
+            processPnpProducts(results, getPnpStore(), category);
+        }
+        else if (storeName.equalsIgnoreCase("Shoprite")) {
+            var results = shopriteScraper.scrapeCategory(url);
+            processShopriteProducts(results, getShopriteStore(), category);
+        }
+    }
 
     private BigDecimal parseShopritePrice(String priceStr) {
         if (priceStr == null || priceStr.isBlank()) return null;

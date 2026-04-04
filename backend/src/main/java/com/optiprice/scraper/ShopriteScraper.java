@@ -92,4 +92,9 @@ public class ShopriteScraper {
 
         return products;
     }
+
+    public ShopriteProduct scrapeSpecificUrl(String url) {
+        List<ShopriteProduct> products = scrapeInternal(url);
+        return products.isEmpty() ? null : products.getFirst();
+    }
 }

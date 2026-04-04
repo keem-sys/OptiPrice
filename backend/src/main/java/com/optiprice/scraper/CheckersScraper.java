@@ -143,6 +143,11 @@ public class CheckersScraper {
         return products;
     }
 
+    public CheckersProduct scrapeSpecificUrl(String url) {
+        List<CheckersProduct> products = scrapeInternal(url);
+        return products.isEmpty() ? null : products.getFirst();
+    }
+
     public static void main(String[] args) {
         String searchTerm = args.length > 0 ? args[0] : "milk";
 

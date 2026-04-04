@@ -7,10 +7,7 @@ import com.optiprice.scheduler.CategoryScraperJob;
 import com.optiprice.scraper.ScraperOrchestrator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -20,6 +17,7 @@ import java.util.List;
 public class AdminController {
     private final DailyScraperJob dailyScraperJob;
     private final CategoryScraperJob categoryScraperJob;
+    private final ScraperOrchestrator scraperOrchestrator;
 
     @PostMapping("/trigger-daily-scrape")
     public ResponseEntity<String> triggerScrape() {

@@ -88,5 +88,8 @@ public class PnpScraper {
         return new ArrayList<>();
     }
 
-
+    public PnpProduct scrapeSpecificUrl(String url) {
+        List<PnpProduct> products = scrapeInternal(url);
+        return products.isEmpty() ? null : products.getFirst();
+    }
 }
