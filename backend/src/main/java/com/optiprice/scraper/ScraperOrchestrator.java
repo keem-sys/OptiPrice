@@ -274,19 +274,19 @@ public class ScraperOrchestrator {
 
     private Store getShopriteStore() {
         return storeService.getOrCreateStore("Shoprite",
-                "https://upload.wikimedia.org/wikipedia/commons/f/fc/Logo_-_Shoprite_-_SUPERMARCE.jpg",
+                "https://www.shoprite.co.za/_ui/responsive/theme-shoprite/images/favicon.ico",
                 "https://shoprite.co.za/");
     }
 
     private Store getCheckersStore() {
         return storeService.getOrCreateStore("Checkers",
-                "https://upload.wikimedia.org/wikipedia/en/thumb/b/b4/Checkers_%28supermarket_chain%29_Logo.svg/2560px-Checkers_%28supermarket_chain%29_Logo.svg.png",
+                "https://www.checkers.co.za/iOS-180x180.png",
                 "https://checkers.co.za/");
     }
 
     private Store getPnpStore() {
         return storeService.getOrCreateStore("Pick n Pay",
-                "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Pick_n_Pay_logo.svg/2560px-Pick_n_Pay_logo.svg.png",
+                "https://www.pnp.co.za/assets/icons/apple-touch-icon.png",
                 "https://pnp.co.za/");
     }
 
