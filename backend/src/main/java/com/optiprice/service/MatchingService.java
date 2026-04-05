@@ -214,7 +214,7 @@ public class MatchingService {
         s = s.replaceAll("(?i)(\\d+)\\s*g\\b", "$1G");
         s = s.replaceAll("(?i)(\\d+)\\s*kg\\b", "$1KG");
 
-        s = s.replaceAll("(?i)\\b(Fresh|Instant|Eco|Premium)\\b", "");
+        s = s.replaceAll("(?i)\\b(Instant|Eco|Value|New|Original)\\b", "").trim();
 
         return s.trim().replaceAll("\\s+", " ").toLowerCase();
     }

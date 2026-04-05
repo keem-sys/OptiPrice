@@ -19,9 +19,9 @@ public class PrecisionTestRunner implements CommandLineRunner {
 
         System.out.println("🧪 --- STARTING PRECISION MATCHING TEST ---");
 
-        String checkersUrl = "https://www.checkers.co.za/p/6384b96db69e146995b322b1";
-        String pnpUrl = null;
-        String shopriteUrl = "https://www.shoprite.co.za/All-Departments/Household/Cleaning/Buckets-and-Basins/Jada-Plastic-Bucket-10L-%28Colour-May-Vary%29/p/10384622EA";
+        String checkersUrl = "https://www.checkers.co.za/product/clover-fresh-full-cream-milk-2l-10413121EA";
+        String pnpUrl = "https://www.pnp.co.za/clover-ultra-pasteurised-fresh-full-cream-milk-2l/p/000000000000555462_EA";
+        String shopriteUrl = null;
 
         try {
             // Test Store 1 (Checkers)
