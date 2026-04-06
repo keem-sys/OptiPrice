@@ -11,9 +11,9 @@ interface ProductCardProps {
 }
 
 const STORE_COLORS: Record<string, string> = {
-    "Checkers": "#38A8AE",
-    "Shoprite": "#ea212d",
-    "Pick n Pay": "#003359",
+    "Checkers": "bg-checkers",
+    "Shoprite": "bg-shoprite",
+    "Pick n Pay": "bg-pnp",
     "default": "bg-slate-400"
 };
 
@@ -152,7 +152,7 @@ export function ProductCard({ product }: ProductCardProps) {
                                 </div>
                             ))}
                         </div>
-                        <span className="text-xs font-medium text-slate-500 ml-1">
+                        <span className="text-sm font-medium text-slate-500 ml-1">
                             {storeCount} {storeCount === 1 ? 'store' : 'stores'}
                         </span>
                     </div>

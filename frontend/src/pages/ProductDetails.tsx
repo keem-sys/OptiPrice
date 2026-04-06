@@ -374,7 +374,7 @@ export default function ProductDetails() {
                     <h2 className="mb-4 text-lg font-semibold text-slate-800">
                         Price History
                     </h2>
-                    <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+                    <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
                         <PriceHistoryChart masterId={id} />
                     </div>
                 </section>
