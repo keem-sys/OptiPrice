@@ -2,11 +2,18 @@ import { Link, useParams, useLocation, useNavigate } from "react-router-dom";
 import { useProductDetails } from "@/hooks/useProducts";
 import { PriceHistoryChart } from "@/components/products/PriceHistoryChart.tsx";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Loader2, AlertCircle, ExternalLink, Tag, TrendingDown } from "lucide-react";
+import {ArrowLeft, Loader2, AlertCircle, ExternalLink, Tag, TrendingDown, ZoomIn} from "lucide-react";
 import { formatCurrency } from "@/lib/formatters";
 import { cn } from "@/lib/utils";
 import type { StoreItem } from "@/types";
 import React from "react";
+
+import {
+    Dialog,
+    DialogContent,
+    DialogTrigger,
+    DialogTitle,
+} from "@/components/ui/dialog";
 
 const STORE_STYLES: Record<string, { dot: string; chip: string; text: string }> = {
     Checkers: {
@@ -227,18 +234,41 @@ export default function ProductDetails() {
             <div className="mb-10 flex flex-col gap-8 md:flex-row md:items-start">
 
                 {/* Product image */}
-                <div className="relative shrink-0 self-start">
-                    <div className="flex h-56 w-56 items-center justify-center rounded-2xl border border-slate-100 bg-slate-50 p-6 shadow-sm">
-                        <img
-                            src={image}
-                            alt={product.genericName}
-                            className="h-full w-full object-contain mix-blend-multiply"
-                        />
-                    </div>
+                <div className="relative w-full sm:w-auto sm:shrink-0 sm:self-start">
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <div className="group relative flex h-48 w-full sm:h-56 sm:w-56 cursor-zoom-in items-center justify-center rounded-2xl border border-slate-100 bg-slate-50 p-6 shadow-sm transition-all hover:border-indigo-200 hover:shadow-md">
+                                <img
+                                    src={image}
+                                    alt={product.genericName}
+                                    className="h-full w-full object-contain mix-blend-multiply transition-transform duration-300 group-hover:scale-105"
+                                />
+
+                                <div className="absolute right-3 top-3 rounded-full bg-white/80 p-1.5 text-slate-600 opacity-0 backdrop-blur-sm transition-opacity group-hover:opacity-100 shadow-sm">
+                                    <ZoomIn size={16} />
+                                </div>
+                            </div>
+                        </DialogTrigger>
+
+                        <DialogContent className="max-w-2xl w-[calc(100%-2rem)] sm:w-full border-none bg-transparent p-0 shadow-none">
+                            <DialogTitle className="sr-only">
+                                Fullscreen view of {product.genericName}
+                            </DialogTitle>
+
+                            <div className="relative flex h-[50vh] sm:h-[70vh] w-full items-center justify-center bg-white/95 rounded-2xl backdrop-blur-md p-6 sm:p-8">
+                                <img
+                                    src={image}
+                                    alt={product.genericName}
+                                    className="h-full w-full object-contain drop-shadow-2xl"
+                                />
+                            </div>
+                        </DialogContent>
+                    </Dialog>
+
                     {promoItems.length > 0 && (
-                        <span className="absolute -right-2 -top-2 rounded-full bg-rose-500 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-white shadow">
+                        <span className="absolute -right-2 -top-2 z-10 rounded-full bg-rose-500 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-white shadow pointer-events-none">
                             On Sale
-                        </span>
+                         </span>
                     )}
                 </div>
 

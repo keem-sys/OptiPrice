@@ -274,7 +274,7 @@ public class ScraperOrchestrator {
 
     private Store getShopriteStore() {
         return storeService.getOrCreateStore("Shoprite",
-                "https://www.shoprite.co.za/_ui/responsive/theme-shoprite/images/favicon.ico",
+                "https://play-lh.googleusercontent.com/7wOKN9PHuraqRuAogIAcPWN2JGH0E8_VOMCtg4j2zBPgPWz6VnRxiwH-GwXdXv9BKM7S=w480-h960-rw",
                 "https://shoprite.co.za/");
     }
 
