@@ -63,21 +63,21 @@ function StoreRow({
     return (
         <div
             className={cn(
-                "group relative flex items-center gap-4 rounded-xl border px-5 py-4 transition-all",
+                "group relative flex items-start gap-3 sm:gap-4 rounded-xl border px-4 sm:px-5 py-4 transition-all",
                 isBest
-                    ? "border-emerald-200 bg-emerald-50/60"
+                    ? "border-emerald-200 bg-emerald-50/60 pt-8"
                     : "border-slate-100 bg-white hover:border-slate-200 hover:shadow-sm"
             )}
         >
             {/* Best-price ribbon */}
             {isBest && (
-                <span className="absolute -top-px left-4 rounded-b-md bg-emerald-500 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-white">
+                <span className="absolute -top-px left-4 rounded-b-md bg-emerald-500 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-white shadow-sm">
                     Best Price
                 </span>
             )}
 
             {/* Store logo / fallback dot */}
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-slate-100 bg-white shadow-sm">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-slate-100 bg-white shadow-sm mt-0.5">
                 {item.store.logoUrl ? (
                     <img
                         src={item.store.logoUrl}
@@ -91,24 +91,27 @@ function StoreRow({
 
             {/* Store name + promo */}
             <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                    <span className="font-semibold text-slate-800">{item.store.name}</span>
+                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                    <span className="font-semibold text-slate-800 leading-none">{item.store.name}</span>
                     {item.isOnPromotion && item.promotionText && (
                         <span
                             className={cn(
-                                "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium",
+                                "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium whitespace-nowrap",
                                 style.chip
                             )}
                         >
-                            <Tag size={10} />
+                            <Tag size={10} className="shrink-0" />
                             {item.promotionText}
                         </span>
                     )}
                 </div>
-                <p className="mt-0.5 truncate text-sm text-slate-400">{item.storeSpecificName}</p>
+
+                <p className="mt-1.5 text-sm text-slate-500 leading-snug pr-2 text-balance">
+                    {item.storeSpecificName}
+                </p>
 
                 {/* Price bar */}
-                <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+                <div className="mt-2.5 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
                     <div
                         className={cn(
                             "h-full rounded-full transition-all",
@@ -123,7 +126,7 @@ function StoreRow({
             <div className="flex shrink-0 flex-col items-end gap-1">
                 <span
                     className={cn(
-                        "text-2xl font-bold tabular-nums leading-none",
+                        "text-xl sm:text-2xl font-bold tabular-nums leading-none",
                         isBest ? "text-emerald-600" : "text-slate-700"
                     )}
                 >
@@ -131,12 +134,12 @@ function StoreRow({
                 </span>
 
                 {savings ? (
-                    <span className="flex items-center gap-1 text-xs font-medium text-emerald-600">
-                        <TrendingDown size={11} />
+                    <span className="flex items-center gap-1 text-xs font-medium text-emerald-600 mt-1">
+                        <TrendingDown size={11} className="shrink-0" />
                         Save {formatCurrency(savings)}
                     </span>
                 ) : item.oldPrice && item.oldPrice > item.price ? null : (
-                    <span className="text-xs text-slate-400">
+                    <span className="text-xs text-slate-400 mt-1 text-right">
                         {item.lastUpdated
                             ? `Updated ${new Date(item.lastUpdated).toLocaleDateString("en-ZA", {
                                 day: "numeric",
@@ -152,11 +155,11 @@ function StoreRow({
                         target="_blank"
                         rel="noopener noreferrer"
                         className={cn(
-                            "mt-1 inline-flex items-center gap-1 text-xs font-medium underline-offset-2 hover:underline",
+                            "mt-1.5 inline-flex items-center gap-1 text-xs font-medium underline-offset-2 hover:underline",
                             style.text
                         )}
                     >
-                        View in store <ExternalLink size={10} />
+                        Visit store <ExternalLink size={10} className="shrink-0" />
                     </a>
                 )}
             </div>
