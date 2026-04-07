@@ -1,10 +1,10 @@
 import { useSearchParams } from "react-router-dom";
 import { useDeals } from "@/hooks/useDeals";
-import { ProductCard } from "@/components/products/ProductCard";
 import { Flame, TrendingDown, ArrowLeft, ArrowRight, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {useEffect, useCallback} from "react";
+import {ProductGrid} from "@/components/products/ProductGrid.tsx";
 
 type DealType = "arbitrage" | "drops" | "promotions";
 
@@ -118,12 +118,21 @@ export function DealsPage() {
 
             {/* DATA GRID */}
             {!isLoading && data && data.content.length > 0 && (
-                <>
-                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                        {data.content.map((product) => (
-                            <ProductCard key={product.id} product={product} />
-                        ))}
-                    </div>
+                <div className={isFetching ? "opacity-50 pointer-events-none transition-opacity" : "opacity-100"}>
+                    <ProductGrid
+                        products={data.content}
+                        loading={false}
+                        onSwipeNext={() => {
+                            if (page < data.totalPages - 1) {
+                                handlePageChange(page + 1);
+                            }
+                        }}
+                        onSwipePrev={() => {
+                            if (page > 0) {
+                                handlePageChange(page - 1);
+                            }
+                        }}
+                    />
 
                     {/* PAGINATION */}
                     {data.totalPages > 1 && (
@@ -137,7 +146,7 @@ export function DealsPage() {
                             </Button>
                         </div>
                     )}
-                </>
+                </div>
             )}
 
             {/* EMPTY STATE */}

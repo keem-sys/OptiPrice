@@ -111,6 +111,12 @@ export default function Home() {
                         <ProductGrid
                             products={results}
                             loading={isLoading || (isFetching && !data)}
+                            onSwipeNext={() => {
+                                if (pageInUrl < totalPages - 1) handlePageChange(pageInUrl + 1);
+                            }}
+                            onSwipePrev={() => {
+                                if (pageInUrl > 0) handlePageChange(pageInUrl - 1);
+                            }}
                         />
                     </div>
                 )}
