@@ -22,13 +22,13 @@ public class DailyScraperJob {
 
     private final List<String> ESSENTIALS = List.of(
             "Maize Meal",
-            "Tastic Rice",
+            "Rice",
             "Eggs",
-            "Full Cream Milk 2L",
-            "White Bread",
-            "Sunflower Oil 2L",
-            "Coca-Cola 2L",
-            "Tomato Sauce"
+            "Milk",
+            "Bread"
+            // "Oil"
+            // "Coca-Cola 2L",
+            // "Tomato Sauce"
     );
 
     @Scheduled(cron = "0 0 4 * * *")

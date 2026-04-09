@@ -33,7 +33,7 @@ export function Footer() {
                         <ul className="flex flex-col gap-3 text-sm text-slate-500">
                             <li><Link to="/" className="hover:text-indigo-600 transition-colors">Search Products</Link></li>
                             <li><Link to="/deals" className="hover:text-indigo-600 transition-colors">Daily Deals</Link></li>
-                            <li><Link to="/history" className="hover:text-indigo-600 transition-colors">Price Trends</Link></li>
+                            <li><Link to="/trends" className="hover:text-indigo-600 transition-colors">Price Trends</Link></li>
                         </ul>
                     </div>
 
@@ -59,7 +59,6 @@ export function Footer() {
 
                 </div>
 
-                {/* Bottom Section: Copyright Bar */}
                 <div className="flex flex-col md:flex-row items-center justify-between pt-8 border-t border-slate-100 text-sm text-slate-400 gap-4">
                     <div>
                         &copy; {new Date().getFullYear()} OptiPrice. All rights reserved.

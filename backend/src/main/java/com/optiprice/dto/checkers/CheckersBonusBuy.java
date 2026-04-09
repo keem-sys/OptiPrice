@@ -8,6 +8,7 @@ public record CheckersBonusBuy(
         String name,
         String shortDescription,
         Double discountValue,
+        CheckersDiscountType discountType,
         CheckersMemberType memberType
 )
 {}

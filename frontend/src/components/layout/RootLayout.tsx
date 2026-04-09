@@ -1,6 +1,7 @@
 import { Outlet, ScrollRestoration } from 'react-router-dom';
 import { Navbar } from "./Navbar";
 import { Footer } from "./Footer";
+import {Toaster} from "sonner";
 
 export default function RootLayout() {
     return (
@@ -8,8 +9,8 @@ export default function RootLayout() {
             <ScrollRestoration />
 
             <Navbar />
-
-            <main className="flex-grow w-full">
+            <Toaster richColors />
+            <main className="grow w-full">
                 <Outlet />
             </main>
 
